@@ -43,8 +43,10 @@ def barra_nc_to_df(nc_filename, target_lat = -42.882808, target_lon = 147.330266
     # extracts time data (in hours since 01/01/1970 00:00:00)
     nc_time = np.array(nc.variables['time'][:])
     
+    # creates a list of the zip of year, day of year (DOY), hour, and main variable from the netcdf
     nc_data_ext = list(zip(pd.to_datetime(nc_time,unit='h').year,pd.to_datetime(nc_time,unit='h').dayofyear,pd.to_datetime(nc_time,unit='h').hour,nc_main))
-
+    
+    # creates a dataframe from the above list
     nc_df = pd.DataFrame(nc_data_ext,columns=['Year','DOY','Hour',nc_main_varname])
 
     return nc_df
@@ -52,6 +54,11 @@ def barra_nc_to_df(nc_filename, target_lat = -42.882808, target_lon = 147.330266
 # =============================================================================
 # 
 # =============================================================================
+
+Get list of netcdf filenames
+
+
+
 
 nc = Dataset('temp_scrn-fc-spec-PT1H-utas-v1.2-20150101T0000Z.nc',mode='r')
 
