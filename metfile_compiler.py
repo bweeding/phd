@@ -9,6 +9,7 @@ import os
 from netCDF4 import Dataset
 import numpy as np
 from datetime import datetime, date
+import pandas as pd
 
 # set working directory to phd repository
 os.chdir('C:\\Users\\weedingb\\Documents\\GitHub\\phd')
@@ -33,7 +34,15 @@ target_lon_idx = (np.abs(nc_lon-target_lon)).argmin()
 
 target_nc_temp_scrn = np.array(nc.variables['temp_scrn'][:,target_lat_idx,target_lon_idx])
 
-date(2007, 12, 31).timetuple().tm_yday
+target_nc_time = np.array(nc.variables['time'][:])
+
+pd.to_datetime(target_nc_time,unit='h')
+
+target_nc_data = list(zip(pd.to_datetime(target_nc_time,unit='h').year,pd.to_datetime(target_nc_time,unit='h').dayofyear,pd.to_datetime(target_nc_time,unit='h').hour,target_nc_temp_scrn))
+
+target_nc_df = pd.DataFrame(target_nc_data,columns=['Year','DOY','Hour','Scrn T'])
+
+
 
 ['longitude',
  'time',
@@ -45,4 +54,6 @@ date(2007, 12, 31).timetuple().tm_yday
  'temp_scrn']
 
 units: hours since 1970-01-01 00:00:00
+
+met_df = pd.DataFrame(columns=['%iy','id','it','imin','Q*','QH','QE','Qs','Qf','Wind','RH','Td','press','rain','Kdn','snow','ldown','fcld','wuh','xsmd','lai_hr','Kdiff','Kdir','Wd'])
 
