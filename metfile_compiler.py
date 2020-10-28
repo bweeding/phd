@@ -49,13 +49,16 @@ def barra_nc_to_df(nc_filename, target_lat = -42.882808, target_lon = 147.330266
     # creates a dataframe from the above list
     nc_df = pd.DataFrame(nc_data_ext,columns=['Year','DOY','Hour',nc_main_varname])
 
+    # returns the created dataframe
     return nc_df
 
 # =============================================================================
 # 
 # =============================================================================
 
-Get list of netcdf filenames
+
+
+
 
 
 
