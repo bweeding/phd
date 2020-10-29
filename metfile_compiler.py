@@ -24,7 +24,12 @@ os.chdir('C:/Users/weedingb/Desktop/barra dir test')
     
 #     print(files)
     
-total_df = pd.DataFrame()
+total_df = pd.DataFrame(columns=['Year','DOY','Hour','temp_scrn','rh2m'])
+
+total_df = total_df.set_index(['Year','DOY','Hour'])
+
+#total_df = pd.DataFrame()
+
 
 for root, dirs, files in os.walk(r'C:/Users/weedingb/Desktop/Barra dir test'):
     
@@ -34,11 +39,11 @@ for root, dirs, files in os.walk(r'C:/Users/weedingb/Desktop/Barra dir test'):
         
         file_loc = os.path.join(root,fname)
         
-        nc = barra_nc_to_df(file_loc.replace(os.sep, '/'))
+        ncx = barra_nc_to_df(file_loc.replace(os.sep, '/'))
+         
+        total_df = total_df.merge(ncx,on=['Year','DOY','Hour'],how='outer')
         
-        nc.close()
-    
-        #total_df.merge(barra_nc_to_df(os.path.join(root,fname)))
+
 
 
 # =============================================================================
@@ -56,8 +61,9 @@ def barra_nc_to_df(nc_file_loc, target_lat = -42.882808, target_lon = 147.330266
     
     # extracts the main variable name for the file from the filename
     nc_main_varname = nc_file_loc.rpartition(splitter)[0]
-    nc_main_varname = nc_file_loc.rpartition('/')[-1]
-    
+    nc_main_varname = nc_main_varname.rpartition('/')[-1]
+   
+ 
     # find indices of closest lat and lon in netcdf
     lat_idx = (np.abs(np.array(nc.variables['latitude'][:])-target_lat)).argmin()
     lon_idx = (np.abs(np.array(nc.variables['longitude'][:])-target_lon)).argmin()
@@ -73,6 +79,11 @@ def barra_nc_to_df(nc_file_loc, target_lat = -42.882808, target_lon = 147.330266
     
     # creates a dataframe from the above list
     nc_df = pd.DataFrame(nc_data_ext,columns=['Year','DOY','Hour',nc_main_varname])
+    
+    nc_df = nc_df.set_index(['Year','DOY','Hour'])
+
+    # closes current netcdf
+    nc.close()    
 
     # returns the created dataframe
     return nc_df
