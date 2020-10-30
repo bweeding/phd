@@ -9,66 +9,77 @@ import os
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
+import time
 
-# set working directory to phd repository
-os.chdir('C:\\Users\\weedingb\\Documents\\GitHub\\phd')
-
-# set wdir to netcdf location
-os.chdir('C:/Users/weedingb/Desktop/barra_temp_sample')
-
-# set wdir to netcdf location
+# set wdir to netcdf directory
 os.chdir('C:/Users/weedingb/Desktop/barra dir test')
 
-# for root, dirs, files in os.walk('C:\\Users\\weedingb\\Desktop\\Barra dir test'):
-    
-#     print(files)
-
+# list of Barra variables to import
 target_vars = ['temp_scrn','rh2m','uwnd10m','vwnd10m']
     
+# create dataframe to fill with target variable data
 total_df = pd.DataFrame(columns=['Year','DOY','Hour'])
 
+# set index of dataframe to enable merging
 total_df = total_df.set_index(['Year','DOY','Hour'])
 
+# optional timer start
+#t0=time.time()
 
+# loop through all files in directory
 for root, dirs, files in os.walk(r'C:/Users/weedingb/Desktop/Barra dir test'):
     
+    # for each file
     for fname in files:
     
-        print(os.path.join(root,fname))
+        # optional print filename
+        #print(os.path.join(root,fname))
         
+        # extract file location
         file_loc = os.path.join(root,fname)
         
+        # create dataframe from file using function defined below
         ncx = barra_nc_to_df(file_loc.replace(os.sep, '/'))
          
+        # merge new dataframe with total_df - will contain additional overlapping columns and NaNs
         total_df = total_df.merge(ncx,left_index=True, right_index=True,how='outer')
         
-# ugly solution, can be looped for greater number of variables!
 
+# for each of the Barra variables
 for current_var in target_vars:
     
+    # fill the target variable named columns with the maximum values from each overlapping column to obtain the correct data at each timestamp
     total_df[current_var] = total_df[total_df.filter(like=current_var).columns].max(axis=1)
-        
+
+# remove the overlapping columns        
 total_df = total_df[target_vars]
 
 # calculate total windspeed
-
 total_df['wspd10m'] = np.sqrt(np.square(total_df['uwnd10m']) + np.square(total_df['vwnd10m']))
 
+# remove the multindex from total_df to allow for easy extraction of timings to export file
 total_df = total_df.reset_index(level=['Year','DOY','Hour'])
 
-
+# create a dataframe with the headings specified @ https://umep-docs.readthedocs.io/en/latest/pre-processor/Meteorological%20Data%20MetPreprocessor.html
 met_df = pd.DataFrame(columns=['iy','id','it','imin','qn','qh','qe','qs','qf','U','RH','Tair','pres','rain','kdown','snow','ldown','fcld','wuh','xsmd,','lai','kdiff','kdir','wdir'])
 
-
-
+# fill met_df with the appropriate data from total_df
 met_df[['iy','id','it','Tair','RH','U']] = total_df[['Year','DOY','Hour','temp_scrn','rh2m','wspd10m']]
 
+# set minutes to zero as we are using on the hour data
 met_df['imin'] = np.zeros(met_df['imin'].shape)
 
-# must be last!?
+# fill all Nans with -999.00 in accordance with https://umep-docs.readthedocs.io/en/latest/pre-processor/Meteorological%20Data%20MetPreprocessor.html
 met_df = met_df.fillna(-999.00)
 
-met_df.to_csv('metfile.zip',sep=' ',index='False')
+# optional timer end
+#t1=time.time()
+
+# optional print timing
+#print(t1-t0)
+
+# export met_df to spaced separated text file for use in UMEP
+met_df.to_csv('metfile.txt',index=False,sep=' ')
 
 
 # =============================================================================
