@@ -25,7 +25,7 @@ os.chdir('C:/Users/weedingb/Desktop/barra dir test')
 
 target_vars = ['temp_scrn','rh2m','uwnd10m','vwnd10m']
     
-total_df = pd.DataFrame(columns=['Year','DOY','Hour','temp_scrn','rh2m'])
+total_df = pd.DataFrame(columns=['Year','DOY','Hour'])
 
 total_df = total_df.set_index(['Year','DOY','Hour'])
 
@@ -50,7 +50,18 @@ for current_var in target_vars:
         
 total_df = total_df[target_vars]
 
+# calculate total windspeed
 
+total_df['wspd10m'] = np.sqrt(np.square(total_df['uwnd10m']) + np.square(total_df['vwnd10m']))
+
+total_df = total_df.reset_index(level=['Year','DOY','Hour'])
+
+
+met_df = pd.DataFrame(columns=['%iy','id','it','imin','Q*','QH','QE','Qs','Qf','Wind','RH','Td','press','rain','Kdn','snow','ldown','fcld','wuh','xsmd','lai_hr','Kdiff','Kdir','Wd'])
+
+met_df['%iy'] = total_df['Year']
+
+met_df = met_df.fillna(-999.00)
 
 
 # =============================================================================
@@ -141,7 +152,7 @@ def barra_nc_to_df(nc_file_loc, target_lat = -42.882808, target_lon = 147.330266
 
 # #units: hours since 1970-01-01 00:00:00
 
-# met_df = pd.DataFrame(columns=['%iy','id','it','imin','Q*','QH','QE','Qs','Qf','Wind','RH','Td','press','rain','Kdn','snow','ldown','fcld','wuh','xsmd','lai_hr','Kdiff','Kdir','Wd'])
+#met_df = pd.DataFrame(columns=['%iy','id','it','imin','Q*','QH','QE','Qs','Qf','Wind','RH','Td','press','rain','Kdn','snow','ldown','fcld','wuh','xsmd','lai_hr','Kdiff','Kdir','Wd'])
 
 
 
