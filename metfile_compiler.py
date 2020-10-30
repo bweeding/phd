@@ -28,8 +28,6 @@ total_df = pd.DataFrame(columns=['Year','DOY','Hour','temp_scrn','rh2m'])
 
 total_df = total_df.set_index(['Year','DOY','Hour'])
 
-#total_df = pd.DataFrame()
-
 
 for root, dirs, files in os.walk(r'C:/Users/weedingb/Desktop/Barra dir test'):
     
@@ -41,9 +39,14 @@ for root, dirs, files in os.walk(r'C:/Users/weedingb/Desktop/Barra dir test'):
         
         ncx = barra_nc_to_df(file_loc.replace(os.sep, '/'))
          
-        total_df = total_df.merge(ncx,on=['Year','DOY','Hour'],how='outer')
+        total_df = total_df.merge(ncx,left_index=True, right_index=True,how='outer')
         
-
+# ugly solution, can be looped for greater number of variables!
+total_df['temp_scrn'] = total_df[total_df.filter(like='temp_scrn').columns].max(axis=1)
+        
+total_df['rh2m'] = total_df[total_df.filter(like='rh2m').columns].max(axis=1)
+        
+total_df = total_df[['temp_scrn','rh2m']]
 
 
 # =============================================================================
