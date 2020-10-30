@@ -57,11 +57,18 @@ total_df['wspd10m'] = np.sqrt(np.square(total_df['uwnd10m']) + np.square(total_d
 total_df = total_df.reset_index(level=['Year','DOY','Hour'])
 
 
-met_df = pd.DataFrame(columns=['%iy','id','it','imin','Q*','QH','QE','Qs','Qf','Wind','RH','Td','press','rain','Kdn','snow','ldown','fcld','wuh','xsmd','lai_hr','Kdiff','Kdir','Wd'])
+met_df = pd.DataFrame(columns=['iy','id','it','imin','qn','qh','qe','qs','qf','U','RH','Tair','pres','rain','kdown','snow','ldown','fcld','wuh','xsmd,','lai','kdiff','kdir','wdir'])
 
-met_df['%iy'] = total_df['Year']
 
+
+met_df[['iy','id','it','Tair','RH','U']] = total_df[['Year','DOY','Hour','temp_scrn','rh2m','wspd10m']]
+
+met_df['imin'] = np.zeros(met_df['imin'].shape)
+
+# must be last!?
 met_df = met_df.fillna(-999.00)
+
+met_df.to_csv('metfile.zip',sep=' ',index='False')
 
 
 # =============================================================================
