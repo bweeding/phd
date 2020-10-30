@@ -8,7 +8,6 @@ Created on Wed Oct 28 12:43:07 2020
 import os
 from netCDF4 import Dataset
 import numpy as np
-from datetime import datetime, date
 import pandas as pd
 
 # set working directory to phd repository
@@ -23,6 +22,8 @@ os.chdir('C:/Users/weedingb/Desktop/barra dir test')
 # for root, dirs, files in os.walk('C:\\Users\\weedingb\\Desktop\\Barra dir test'):
     
 #     print(files)
+
+target_vars = ['temp_scrn','rh2m','uwnd10m','vwnd10m']
     
 total_df = pd.DataFrame(columns=['Year','DOY','Hour','temp_scrn','rh2m'])
 
@@ -42,11 +43,14 @@ for root, dirs, files in os.walk(r'C:/Users/weedingb/Desktop/Barra dir test'):
         total_df = total_df.merge(ncx,left_index=True, right_index=True,how='outer')
         
 # ugly solution, can be looped for greater number of variables!
-total_df['temp_scrn'] = total_df[total_df.filter(like='temp_scrn').columns].max(axis=1)
+
+for current_var in target_vars:
+    
+    total_df[current_var] = total_df[total_df.filter(like=current_var).columns].max(axis=1)
         
-total_df['rh2m'] = total_df[total_df.filter(like='rh2m').columns].max(axis=1)
-        
-total_df = total_df[['temp_scrn','rh2m']]
+total_df = total_df[target_vars]
+
+
 
 
 # =============================================================================
