@@ -14,6 +14,7 @@ import time
 # set wdir to netcdf directory
 os.chdir('C:/Users/weedingb/Desktop/barra dir test')
 
+os.chdir('/rdsi/barra/private/BARRA_TA/v1/utas/v1.2/hourly')
 
 # optional timer start
 #t0=time.time()
@@ -84,20 +85,22 @@ def barra_to_UMEP_met(start_date,end_date):
         # for each file
         for fname in files:
             
-            if pd.to_datetime(start_date) <= pd.to_datetime(fname[-17:-9]) <= pd.to_datetime(end_date):
-        
-                # optional print filename
-                #print(os.path.join(root,fname))
-                
-                # extract file location
-                file_loc = os.path.join(root,fname)
-                
-                # create dataframe from file using function defined below
-                ncx = barra_nc_to_df(file_loc.replace(os.sep, '/'))
-                 
-                # merge new dataframe with total_df - will contain additional overlapping columns and NaNs
-                total_df = total_df.merge(ncx,left_index=True, right_index=True,how='outer')
-                
+            if any(var in fname for var in target_vars):
+            
+                if pd.to_datetime(start_date) <= pd.to_datetime(fname[-17:-9]) <= pd.to_datetime(end_date):
+            
+                    # optional print filename
+                    #print(os.path.join(root,fname))
+                    
+                    # extract file location
+                    file_loc = os.path.join(root,fname)
+                    
+                    # create dataframe from file using function defined below
+                    ncx = barra_nc_to_df(file_loc.replace(os.sep, '/'))
+                     
+                    # merge new dataframe with total_df - will contain additional overlapping columns and NaNs
+                    total_df = total_df.merge(ncx,left_index=True, right_index=True,how='outer')
+                    
     
     # for each of the Barra variables
     for current_var in target_vars:
