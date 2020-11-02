@@ -14,7 +14,7 @@ import time
 # set wdir to netcdf directory
 os.chdir('C:/Users/weedingb/Desktop/barra dir test')
 
-os.chdir('/rdsi/barra/private/BARRA_TA/v1/utas/v1.2/hourly')
+#os.chdir('/rdsi/barra/private/BARRA_TA/v1/utas/v1.2/hourly')
 
 # optional timer start
 #t0=time.time()
@@ -90,7 +90,7 @@ def barra_to_UMEP_met(start_date,end_date):
                 if pd.to_datetime(start_date) <= pd.to_datetime(fname[-17:-9]) <= pd.to_datetime(end_date):
             
                     # optional print filename
-                    #print(os.path.join(root,fname))
+                    print(os.path.join(root,fname))
                     
                     # extract file location
                     file_loc = os.path.join(root,fname)
@@ -134,6 +134,11 @@ def barra_to_UMEP_met(start_date,end_date):
     
     # optional print timing
     #print(t1-t0)
+    
+    # sets output path for use on Jupyter
+    #csv_path = '/mnt/bweeding_workspace/output'
+    
+    #csv_output = os.path.join(csv_path,'metfile_'+start_date+'_'+end_date+'.txt')
     
     # export met_df to spaced separated text file for use in UMEP, named with start and end dates
     met_df.to_csv('metfile_'+start_date+'_'+end_date+'.txt',index=False,sep=' ')
