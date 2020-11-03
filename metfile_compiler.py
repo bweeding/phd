@@ -70,7 +70,22 @@ def barra_nc_to_df(nc_file_loc, target_lat = -42.882808, target_lon = 147.330266
 def barra_to_UMEP_met(start_date,end_date):
 
     # list of Barra variables to import
-    target_vars = ['temp_scrn','rh2m','uwnd10m','vwnd10m']
+    target_vars = ['temp_scrn','rh2m','uwnd10m','vwnd10m','av_sfc_sw_dif','av_sfc_sw_dir','av_swsfcdown']
+    
+    # list of instantaneous variables
+    inst_vars = ['temp_scrn','rh2m','uwnd10m','vwnd10m']
+    
+    # list of forecast variables that must be obtained from a separate file path
+    forecast_vars = ['av_sfc_sw_dif','av_sfc_sw_dir','av_swsfcdown']
+    
+    # list of variable types for zipping
+    var_types = [inst_vars, forecast_vars]
+    
+    # list of directories for zipping
+    directories = ['/rdsi/barra/private/BARRA_TA/v1/utas/v1.2/hourly','/rdsi/barra/private/BARRA_TA/v1/forecast/slv']
+    
+    # list of date positions in filenames for zipping
+    date_slices = [slice(-17,-9),slice(-21,-13)]
     
     # create dataframe to fill with target variable data
     total_df = pd.DataFrame(columns=['Year','DOY','Hour'])
@@ -78,28 +93,33 @@ def barra_to_UMEP_met(start_date,end_date):
     # set index of dataframe to enable merging
     total_df = total_df.set_index(['Year','DOY','Hour'])
     
+    # for each combination of file type, directory, and filename position
+    for current_var_type, current_direc, current_slice in zip(var_types,directories,date_slices):
 
-    # loop through all files in directory
-    for root, dirs, files in os.walk(r'C:/Users/weedingb/Desktop/Barra dir test'):
-        
-        # for each file
-        for fname in files:
-            
-            if any(var in fname for var in target_vars):
-            
-                if pd.to_datetime(start_date) <= pd.to_datetime(fname[-17:-9]) <= pd.to_datetime(end_date):
-            
-                    # optional print filename
-                    print(os.path.join(root,fname))
-                    
-                    # extract file location
-                    file_loc = os.path.join(root,fname)
-                    
-                    # create dataframe from file using function defined below
-                    ncx = barra_nc_to_df(file_loc.replace(os.sep, '/'))
-                     
-                    # merge new dataframe with total_df - will contain additional overlapping columns and NaNs
-                    total_df = total_df.merge(ncx,left_index=True, right_index=True,how='outer')
+        # for each variable named folder
+        for var_folder in current_var_type:
+
+            # for each location
+            for root, dirs, files in os.walk(current_direc+'/'+var_folder):
+
+                # for each file
+                for fname in files:
+
+                    if any(var in fname for var in current_var_type):
+
+                        if pd.to_datetime(start_date) <= pd.to_datetime(fname[current_slice]) <= pd.to_datetime(end_date):
+
+                            # optional print filename
+                            print(os.path.join(root,fname))
+
+                            # extract file location
+                            file_loc = os.path.join(root,fname)
+
+                            # create dataframe from file using function defined below
+                            ncx = barra_nc_to_df(file_loc.replace(os.sep, '/'))
+
+                            # merge new dataframe with total_df - will contain additional overlapping columns and NaNs
+                            total_df = total_df.merge(ncx,left_index=True, right_index=True,how='outer')
                     
     
     # for each of the Barra variables
@@ -114,14 +134,17 @@ def barra_to_UMEP_met(start_date,end_date):
     # calculate total windspeed
     total_df['wspd10m'] = np.sqrt(np.square(total_df['uwnd10m']) + np.square(total_df['vwnd10m']))
     
+    # convert temperature from Kelvin to Celsius
+    total_df['temp_scrn'] -= 273.15
+    
     # remove the multindex from total_df to allow for easy extraction of timings to export file
     total_df = total_df.reset_index(level=['Year','DOY','Hour'])
     
     # create a dataframe with the headings specified @ https://umep-docs.readthedocs.io/en/latest/pre-processor/Meteorological%20Data%20MetPreprocessor.html
-    met_df = pd.DataFrame(columns=['iy','id','it','imin','qn','qh','qe','qs','qf','U','RH','Tair','pres','rain','kdown','snow','ldown','fcld','wuh','xsmd,','lai','kdiff','kdir','wdir'])
+    met_df = pd.DataFrame(columns=['iy','id','it','imin','qn','qh','qe','qs','qf','U','RH','Tair','pres','rain','kdown','snow','ldown','fcld','wuh','xsmd','lai','kdiff','kdir','wdir'])
     
     # fill met_df with the appropriate data from total_df
-    met_df[['iy','id','it','Tair','RH','U']] = total_df[['Year','DOY','Hour','temp_scrn','rh2m','wspd10m']]
+    met_df[['iy','id','it','Tair','RH','U','kdiff','kdir','kdown']] = total_df[['Year','DOY','Hour','temp_scrn','rh2m','wspd10m','av_sfc_sw_dif','av_sfc_sw_dir','av_swsfcdown']]
     
     # set minutes to zero as we are using on the hour data
     met_df['imin'] = np.zeros(met_df['imin'].shape)
@@ -136,12 +159,12 @@ def barra_to_UMEP_met(start_date,end_date):
     #print(t1-t0)
     
     # sets output path for use on Jupyter
-    #csv_path = '/mnt/bweeding_workspace/output'
+    csv_path = '/mnt/bweeding_workspace/output'
     
-    #csv_output = os.path.join(csv_path,'metfile_'+start_date+'_'+end_date+'.txt')
+    csv_output = os.path.join(csv_path,'metfile_'+start_date+'_'+end_date+'.txt')
     
     # export met_df to spaced separated text file for use in UMEP, named with start and end dates
-    met_df.to_csv('metfile_'+start_date+'_'+end_date+'.txt',index=False,sep=' ')
+    met_df.to_csv(csv_output,index=False,sep=' ')
 
 
 
