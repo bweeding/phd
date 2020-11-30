@@ -56,17 +56,21 @@ processing.run("LAStools:lasclip",{'CPU64':True,
                 'OPERATION':0,
                 'CLASSIFY_AS:':6})
 
-# merge ground and vegetation data - not working
+# merge ground and vegetation data - not working, can do with command line
 processing.run("LAStools:lasmerge",{'CPU64':True,
                 'INPUT_LASLAZ':'C:/Users/weedingb/Desktop/Learning_LAStools/ground.las',
                 'FILE2':'C:/Users/weedingb/Desktop/Learning_LAStools/veg_outside_buildings.las',
                 'OUTPUT_LASLAZ':'C:/Users/weedingb/Desktop/Learning_LAStools/ground_and_veg_outside_buildings.las'})
 
+processing.run("LAStools:las2dem",{'CPU64':True,
+                'INPUT_LASLAZ':'C:/Users/weedingb/Desktop/Learning_LAStools/ground_and_veg_outside_buildings.las',
+                'OUTPUT_LASLAZ':'C:/Users/weedingb/Desktop/Learning_LAStools/CDSM.tif'})
 
-# doesn't work as there's no ground!?                
+
+# gives us all points 2.5m+ above the ground (will be only veg)             
 processing.run("LAStools:lasheight",{'CPU64':True,
-                'INPUT_LASLAZ':'C:/Users/weedingb/Desktop/Learning_LAStools/veg_outside_buildings.las',
-                'OUTPUT_LASLAZ':'C:/Users/weedingb/Desktop/Learning_LAStools/veg_outside_buildings_ZMIN_2-5.las',
+                'INPUT_LASLAZ':'C:/Users/weedingb/Desktop/Learning_LAStools/ground_and_veg_outside_buildings.las',
+                'OUTPUT_LASLAZ':'C:/Users/weedingb/Desktop/Learning_LAStools/ground_and_veg_outside_buildings.las_ZMIN_2-5.las',
                 'DROP_BELOW':True,
                 'DROP_BELOW_HEIGHT':2.5})
 
