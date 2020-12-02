@@ -74,6 +74,17 @@ processing.run("LAStools:lasheight",{'CPU64':True,
                 'DROP_BELOW':True,
                 'DROP_BELOW_HEIGHT':2.5})
 
+# Used las merge to create CDSM_veg_2-5.las  
+# Now convert to .tif
+processing.run("LAStools:las2dem",{'CPU64':True,
+                'INPUT_LASLAZ':'C:/Users/weedingb/Desktop/Learning_LAStools/CDSM_veg_2-5.las',
+                'OUTPUT_RASTER':'C:/Users/weedingb/Desktop/Learning_LAStools/CDSM_veg_2-5.tif'})
+
+
+
+
+
+
 
 
 
