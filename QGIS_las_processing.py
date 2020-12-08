@@ -10,6 +10,13 @@ from qgis import processing
 # to get help
 # processing.algorithmHelp("LAStools:lasclip")
 
+processing.run("",{'':,
+                "":
+                "":
+                "":
+                "":
+                ""})
+
 # Initial separation into ground, buildings, vegetation
 ##############################################################################
 # create .las from 2 - ground class
