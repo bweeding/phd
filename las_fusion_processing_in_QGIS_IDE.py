@@ -144,30 +144,22 @@ alg_params_cdsm = {
 }
 CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)  
 
-
-# building_footprint_raster
-alg_params = {
-    'BURN': 0,
-    'DATA_TYPE': 5,
-    'EXTENT': home_folder+'\\DSM_extent.shp',
-    'EXTRA': '',
-    'FIELD': 'zeros',
-    'HEIGHT': 1,
-    'INIT': 1,
-    'INPUT': outputs['Building_footprint_buffered_field_zero']['OUTPUT'],
-    'INVERT': False,
-    'NODATA': None,
-    'OPTIONS': '',
-    'UNITS': 1,
-    'WIDTH': 1,
-    'OUTPUT': QgsProcessing.TEMPORARY_OUTPUT
-}
-outputs['Building_footprint_raster'] = processing.run('gdal:rasterize', alg_params, context=context, feedback=feedback, is_child_algorithm=True)
-
 ################################################################################
-        
-        
-        
+
+# building_footprint_buffered
+alg_params_buildings_buffered = {
+    'DISSOLVE': False,
+    'DISTANCE': 2,
+    'END_CAP_STYLE': 1,
+    'INPUT': build_loc,
+    'JOIN_STYLE': 1,
+    'MITER_LIMIT': 2,
+    'SEGMENTS': 5,
+    'OUTPUT': home_folder+'\\buildings_buffered.shp'
+}
+buildings_buffered = processing.run('native:buffer', alg_params_buildings_buffered)
+
+
         
         
         
