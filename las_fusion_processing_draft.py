@@ -19,6 +19,9 @@ from qgis.analysis import QgsNativeAlgorithms
 	
 import warnings
 
+import pyplugin_installer
+
+
 sys.path.append('C:\\Program Files\\QGIS 3.16\\apps\\qgis\\python\\plugins')
 
 warnings.filterwarnings("ignore",category=DeprecationWarning)
@@ -27,6 +30,10 @@ QgsApplication.setPrefixPath('C:\\Program Files\\QGIS 3.16\\apps\\qgis\\python',
 
 qgs = QgsApplication([], False)
 qgs.initQgis()
+
+pyplugin_installer.instance().fetchAvailablePlugins(False)
+
+pyplugin_installer.instance().installFromZipFile('C:\\Users\\weedingb\\Desktop\\QGIS_processingtools_conda\\processing_umep-0.5.zip')
 
 from processing.core.Processing import Processing
 Processing.initialize()
