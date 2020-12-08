@@ -159,16 +159,39 @@ alg_params_buildings_buffered = {
 }
 buildings_buffered = processing.run('native:buffer', alg_params_buildings_buffered)
 
+# building_footprint_buffered_field_zero
+alg_params_buildings_buffered_zeros = {
+    'FIELD_LENGTH': 10,
+    'FIELD_NAME': 'zeros',
+    'FIELD_PRECISION': 3,
+    'FIELD_TYPE': 1,
+    'FORMULA': 'value = 0',
+    'GLOBAL': '',
+    'INPUT': home_folder+'\\buildings_buffered.shp',
+    'OUTPUT': home_folder+'\\buildings_buffered_zeros.shp'
+}
+buildings_buffered_zeros = processing.run('qgis:advancedpythonfieldcalculator', alg_params_buildings_buffered_zeros)
 
-        
-        
-        
-        
-        
-        
-        
-    
-    
+# building_footprint_raster
+alg_params_buildings_buffered_raster = {
+    'BURN': '',
+    'DATA_TYPE': 5,
+    'EXTENT': home_folder+'\\DSM_extent.shp',
+    'EXTRA': '',
+    'FIELD': 'zeros',
+    'HEIGHT': 1,
+    'INIT': 1,
+    'INPUT': home_folder+'\\buildings_buffered_zeros.shp',
+    'INVERT': False,
+    'NODATA': None,
+    'OPTIONS': '',
+    'UNITS': 1,
+    'WIDTH': 1,
+    'OUTPUT': home_folder+'\\buildings_buffered_raster.tif'
+}
+buildings_buffered_raster = processing.run('gdal:rasterize', alg_params_buildings_buffered_raster)
+
+
 
 
 
