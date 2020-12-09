@@ -191,16 +191,42 @@ alg_params_buildings_buffered_raster = {
 }
 buildings_buffered_raster = processing.run('gdal:rasterize', alg_params_buildings_buffered_raster)
 
+#need to load layers? Can it be done without loading? includ a .isValid() check!
+
+layer1 = QgsRasterLayer(home_folder+'\\buildings_buffered_raster.tif', 'buildings_buffered_raster')
+
+layer2 = QgsRasterLayer(home_folder+'\\CDSM.asc', 'CDSM')
+
+################################################################################
+#Not functioning
+#2020-12-09T12:43:56     WARNING    Cannot open C:\Users\weedingb\Desktop\LAS_fusion_processing\DSM.asc.()
+#2020-12-09T12:45:56     WARNING    Cannot open C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM.asc.()
+# Why is it trying to access DSM???
+# Do we need to assign projections earlier in the code??
+# or change to a tif instead of asc??
+
+alg_params_cdsm_filt1 = {
+    'EXPRESSION':'\"CDSM@1\" * \"buildings_buffered_raster@1\"',
+    'LAYERS':['C:\\Users\\weedingb\\Desktop\\LAS_fusion_processing\\CDSM.asc'],
+    'CELLSIZE':0,
+    'EXTENT':None,
+    'CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
+    'OUTPUT':home_folder+'\\CDSM_filt1.tif'
+}
+
+alg_params_cdsm_filt1 = processing.run("qgis:rastercalculator",alg_params_cdsm_filt1)
+
+################################################################################
+
+layer3 = QgsRasterLayer(home_folder+'\\CDSM_filt1.tif','CDSM_filt1')
 
 
-
-
-
-
-
-
-
-
+processing.run("qgis:rastercalculator", {'EXPRESSION':'(\"CDSM_filt1@1\" > 0.5) * \"CDSM_filt1@1\"',
+'LAYERS':['C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt1.tif'],
+'CELLSIZE':0,
+'EXTENT':None,
+'CRS':None,
+'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt2.tif'})
 
 
 
