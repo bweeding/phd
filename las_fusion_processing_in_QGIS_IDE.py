@@ -38,6 +38,8 @@ alg_params_DEM = {
     
 dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 
+
+
 ################################################################################
 # Process the las files
 
@@ -100,6 +102,8 @@ alg_params_dsm = {
     'OUTPUT': home_folder+'\\DSM.asc'
 }
 DSM = processing.run('fusion:canopymodel', alg_params_dsm)    
+
+processing.run("gdal:assignprojection", {'INPUT':home_folder+'\\DSM.asc','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
     
 ################################################################################
 
@@ -143,6 +147,8 @@ alg_params_cdsm = {
     'OUTPUT': home_folder+'\\CDSM.asc'
 }
 CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)  
+
+processing.run("gdal:assignprojection", {'INPUT':home_folder+'\\CDSM.asc','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
 
 ################################################################################
 
@@ -198,23 +204,30 @@ layer1 = QgsRasterLayer(home_folder+'\\buildings_buffered_raster.tif', 'building
 layer2 = QgsRasterLayer(home_folder+'\\CDSM.asc', 'CDSM')
 
 ################################################################################
-#Not functioning
-#2020-12-09T12:43:56     WARNING    Cannot open C:\Users\weedingb\Desktop\LAS_fusion_processing\DSM.asc.()
-#2020-12-09T12:45:56     WARNING    Cannot open C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM.asc.()
-# Why is it trying to access DSM???
-# Do we need to assign projections earlier in the code??
-# or change to a tif instead of asc??
+
+# try alternative algorithm
 
 alg_params_cdsm_filt1 = {
-    'EXPRESSION':'\"CDSM@1\" * \"buildings_buffered_raster@1\"',
-    'LAYERS':['C:\\Users\\weedingb\\Desktop\\LAS_fusion_processing\\CDSM.asc'],
-    'CELLSIZE':0,
-    'EXTENT':None,
-    'CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
-    'OUTPUT':home_folder+'\\CDSM_filt1.tif'
-}
+    'INPUT_A':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM.asc',
+    'BAND_A':1,'INPUT_B':'C:/Users/weedingb/Desktop/LAS_fusion_processing/buildings_buffered_raster.tif',
+    'BAND_B':None,'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,
+    'FORMULA':'A*B',
+    'NO_DATA':None,
+    'RTYPE':5,
+    'OPTIONS':'',
+    'EXTRA':'',
+    'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt1.tif'}
 
-alg_params_cdsm_filt1 = processing.run("qgis:rastercalculator",alg_params_cdsm_filt1)
+processing.run("gdal:rastercalculator", alg_params_cdsm_filt1)
+
+
+processing.run("qgis:rastercalculator",
+{'EXPRESSION':'\"CDSM@1\" * \"buildings_buffered_raster@1\"',
+'LAYERS':None,'CELLSIZE':1,'EXTENT':'526000.000000000,527001.000000000,5250000.000000000,5251001.000000000 [EPSG:28355]',
+'CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
+'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt1.tif'})
+
+
 
 ################################################################################
 
