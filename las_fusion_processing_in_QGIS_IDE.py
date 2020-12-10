@@ -15,7 +15,7 @@ home_folder = 'C:\\Users\\weedingb\\Desktop\\LAS_fusion_processing'
 ################################################################################
 
 # specifies the location of the current las file and buildings file
-las_loc = home_folder+'\\ClimateFuturesDerwent2008-C2-AHD_5265250_55.las'
+las_loc = home_folder+'\\ClimateFuturesDerwent2008-C2-AHD_5265251_55.las'
 
 build_loc = home_folder+'\\list_2d_building_polys_hobart.shp'
 
@@ -103,8 +103,15 @@ alg_params_dsm = {
 }
 DSM = processing.run('fusion:canopymodel', alg_params_dsm)    
 
-processing.run("gdal:assignprojection", {'INPUT':home_folder+'\\DSM.asc','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
-    
+# convert to tif, then set projection?
+
+processing.run("gdal:translate", 
+{'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM.asc',
+'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
+'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,
+'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM.tif'})
+
+
 ################################################################################
 
 # Convert extent of DSM to a shapefile
@@ -119,7 +126,7 @@ extent = processing.run('native:polygonfromlayerextent',alg_params_extent)
 alg_params_veg_outside_b_zmin2_5 = {
     'ADVANCED_MODIFIERS': '',
     'CLASS': '',
-    'DTM': home_folder+'\\DEM.dtm',
+    'DTM': '',#home_folder+'\\DEM.dtm',
     'EXTENT': home_folder+'\\DSM_extent.shp',
     'HEIGHT': False,
     'IGNOREOVERLAP': False,
@@ -136,7 +143,7 @@ alg_params_cdsm = {
     'ASCII': True,
     'CELLSIZE': 1,
     'CLASS': '',
-    'GROUND': '',
+    'GROUND': '',#home_folder+'\\DEM.dtm',
     'INPUT': home_folder+'\\ground_outside_b.las'+';'+home_folder+'\\veg_outside_b_zmin2_5.las',
     'MEDIAN': '',
     'SLOPE': False,
@@ -144,11 +151,15 @@ alg_params_cdsm = {
     'VERSION64': True,
     'XYUNITS': 0,
     'ZUNITS': 0,
-    'OUTPUT': home_folder+'\\CDSM.asc'
+    'OUTPUT': home_folder+'\\CDSM.tif'
 }
 CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)  
 
-processing.run("gdal:assignprojection", {'INPUT':home_folder+'\\CDSM.asc','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
+processing.run("gdal:translate", 
+{'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM.asc',
+'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
+'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,
+'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM.tif'})
 
 ################################################################################
 
@@ -199,50 +210,45 @@ buildings_buffered_raster = processing.run('gdal:rasterize', alg_params_building
 
 #need to load layers? Can it be done without loading? includ a .isValid() check!
 
-layer1 = QgsRasterLayer(home_folder+'\\buildings_buffered_raster.tif', 'buildings_buffered_raster')
+#layer1 = QgsRasterLayer(home_folder+'\\buildings_buffered_raster.tif', 'buildings_buffered_raster')
 
-layer2 = QgsRasterLayer(home_folder+'\\CDSM.asc', 'CDSM')
+#layer2 = QgsRasterLayer(home_folder+'\\CDSM.asc', 'CDSM')
 
 ################################################################################
 
 # try alternative algorithm
 
 alg_params_cdsm_filt1 = {
-    'INPUT_A':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM.asc',
-    'BAND_A':1,'INPUT_B':'C:/Users/weedingb/Desktop/LAS_fusion_processing/buildings_buffered_raster.tif',
-    'BAND_B':None,'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,
+    'INPUT_A':home_folder+'\\CDSM.asc',
+    'BAND_A':1,
+    'INPUT_B':home_folder+'\\buildings_buffered_raster.tif',
+    'BAND_B':None,
+    'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,
     'FORMULA':'A*B',
     'NO_DATA':None,
     'RTYPE':5,
     'OPTIONS':'',
     'EXTRA':'',
-    'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt1.tif'}
+    'OUTPUT':home_folder+'\\CDSM_filt1.tif'}
 
-processing.run("gdal:rastercalculator", alg_params_cdsm_filt1)
-
-
-processing.run("qgis:rastercalculator",
-{'EXPRESSION':'\"CDSM@1\" * \"buildings_buffered_raster@1\"',
-'LAYERS':None,'CELLSIZE':1,'EXTENT':'526000.000000000,527001.000000000,5250000.000000000,5251001.000000000 [EPSG:28355]',
-'CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
-'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt1.tif'})
-
-
+cdsm_filt1 = processing.run("gdal:rastercalculator", alg_params_cdsm_filt1)
 
 ################################################################################
 
-layer3 = QgsRasterLayer(home_folder+'\\CDSM_filt1.tif','CDSM_filt1')
+#layer3 = QgsRasterLayer(home_folder+'\\CDSM_filt1.tif','CDSM_filt1')
 
+alg_params_cdsm_filt2 = {
+    'INPUT_A':home_folder+'\\CDSM_filt1.tif',
+    'BAND_A':1,
+    'INPUT_B':None,'BAND_B':None,'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,
+    'FORMULA':'(A>0.5)*A',
+    'NO_DATA':None,
+    'RTYPE':5,
+    'OPTIONS':'',
+    'EXTRA':'',
+    'OUTPUT':home_folder+'\\CDSM_filt2.tif'}
 
-processing.run("qgis:rastercalculator", {'EXPRESSION':'(\"CDSM_filt1@1\" > 0.5) * \"CDSM_filt1@1\"',
-'LAYERS':['C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt1.tif'],
-'CELLSIZE':0,
-'EXTENT':None,
-'CRS':None,
-'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt2.tif'})
-
-
-
+processing.run("gdal:rastercalculator", alg_params_cdsm_filt2)
 
 
 
