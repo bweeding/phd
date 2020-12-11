@@ -38,7 +38,9 @@ alg_params_DEM = {
     
 dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 
+processing.run("fusion:dtm2tif", {'INPUT':'C:\\Users\\weedingb\\Desktop\\LAS_fusion_processing\\DEM.dtm','MASK':False,'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif'})
 
+processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
 
 ################################################################################
 # Process the las files
@@ -91,7 +93,7 @@ alg_params_dsm = {
     'ASCII': True,
     'CELLSIZE': 1,
     'CLASS': '',
-    'GROUND': '',
+    'GROUND': home_folder+'\\DEM.dtm',
     'INPUT': home_folder+'\\ground_outside_b.las'+';'+home_folder+'\\buildings_inside_b.las',
     'MEDIAN': '',
     'SLOPE': False,
@@ -143,7 +145,7 @@ alg_params_cdsm = {
     'ASCII': True,
     'CELLSIZE': 1,
     'CLASS': '',
-    'GROUND': '',#home_folder+'\\DEM.dtm',
+    'GROUND': home_folder+'\\DEM.dtm',
     'INPUT': home_folder+'\\ground_outside_b.las'+';'+home_folder+'\\veg_outside_b_zmin2_5.las',
     'MEDIAN': '',
     'SLOPE': False,
@@ -250,8 +252,10 @@ alg_params_cdsm_filt2 = {
 
 processing.run("gdal:rastercalculator", alg_params_cdsm_filt2)
 
+processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt2.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
 
 
+# clipped out a section using a polygon for speed and ran the following processing code
 
 
     
