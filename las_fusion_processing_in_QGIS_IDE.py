@@ -257,6 +257,27 @@ processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_
 
 # clipped out a section using a polygon for speed and ran the following processing code
 
+# program automatic clipping for current project for speed of processing on my machine
+
+files_in = ['C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt2.tif',
+            'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif',
+            'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM.tif']
+
+files_out = ['C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_clipped.tif',
+            'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM_clipped.tif',
+            'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM_clipped.tif']
+
+for file_in,file_out in zip(files_in,files_out):
+
+    processing.run("gdal:cliprasterbyextent", 
+        {'INPUT':file_in,
+        'PROJWIN':'526621.235200000,526944.986000000,5251548.877400000,5251767.751100000 [EPSG:28355]',
+        'NODATA':None,
+        'OPTIONS':'',
+        'DATA_TYPE':0,
+        'EXTRA':'',
+        'OUTPUT':file_out})
+
 
     
     
