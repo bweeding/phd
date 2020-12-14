@@ -254,10 +254,8 @@ processing.run("gdal:rastercalculator", alg_params_cdsm_filt2)
 
 processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt2.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
 
-
-# clipped out a section using a polygon for speed and ran the following processing code
-
-# program automatic clipping for current project for speed of processing on my machine
+# clip files for processing speed on my machine
+################################################################################
 
 files_in = ['C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt2.tif',
             'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif',
@@ -278,6 +276,31 @@ for file_in,file_out in zip(files_in,files_out):
         'EXTRA':'',
         'OUTPUT':file_out})
 
+################################################################################
+# generation of sky view factors
+
+processing.run("umep:Urban Geometry: Sky View Factor", 
+    {'INPUT_DSM':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM_clipped.tif',
+    'USE_VEG':True,
+    'TRANS_VEG':3,
+    'INPUT_CDSM':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_clipped.tif',
+    'TSDM_EXIST':False,
+    'INPUT_TDSM':None,
+    'INPUT_THEIGHT':25,
+    'ANISO':True,
+    'OUTPUT_DIR':'C:\\Users\\weedingb\\Desktop\\LAS_fusion_processing\\run_1412',
+    'OUTPUT_FILE':'C:/Users/weedingb/Desktop/LAS_fusion_processing/run_1412/sky_view.tif'})
+    
+
+processing.run("umep:Urban Geometry: Wall Height and Aspect", 
+    {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM_clipped.tif',
+    'ASPECT_BOOL':True,
+    'INPUT_LIMIT':3,
+    'OUTPUT_HEIGHT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/run_1412/height.tif',
+    'OUTPUT_ASPECT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/run_1412/aspect.tif'})
+    
+################################################################################
+    
 
     
     
