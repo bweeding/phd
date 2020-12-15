@@ -257,13 +257,13 @@ processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_
 # clip files for processing speed on my machine
 ################################################################################
 
-files_in = ['C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt2.tif',
-            'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif',
-            'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM.tif']
+files_in = [home_folder+'/CDSM_filt2.tif',
+            home_folder+'/DEM.tif',
+            home_folder+'/DSM.tif']
 
-files_out = ['C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_clipped.tif',
-            'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM_clipped.tif',
-            'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM_clipped.tif']
+files_out = [home_folder+'/CDSM_clipped.tif',
+            home_folder+'/DEM_clipped.tif',
+            home_folder+'/DSM_clipped.tif']
 
 for file_in,file_out in zip(files_in,files_out):
 
@@ -280,31 +280,75 @@ for file_in,file_out in zip(files_in,files_out):
 # generation of sky view factors
 
 processing.run("umep:Urban Geometry: Sky View Factor", 
-    {'INPUT_DSM':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM_clipped.tif',
+    {'INPUT_DSM':home_folder+'/DSM_clipped.tif',
     'USE_VEG':True,
     'TRANS_VEG':3,
-    'INPUT_CDSM':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_clipped.tif',
+    'INPUT_CDSM':home_folder+'/CDSM_clipped.tif',
     'TSDM_EXIST':False,
     'INPUT_TDSM':None,
     'INPUT_THEIGHT':25,
-    'ANISO':True,
-    'OUTPUT_DIR':'C:\\Users\\weedingb\\Desktop\\LAS_fusion_processing\\run_1412',
-    'OUTPUT_FILE':'C:/Users/weedingb/Desktop/LAS_fusion_processing/run_1412/sky_view.tif'})
+    'ANISO':False,
+    'OUTPUT_DIR':home_folder,
+    'OUTPUT_FILE':home_folder+'/sky_view.tif'})
     
 
 processing.run("umep:Urban Geometry: Wall Height and Aspect", 
-    {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM_clipped.tif',
+    {'INPUT':home_folder+'/DSM_clipped.tif',
     'ASPECT_BOOL':True,
     'INPUT_LIMIT':3,
-    'OUTPUT_HEIGHT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/run_1412/height.tif',
-    'OUTPUT_ASPECT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/run_1412/aspect.tif'})
+    'OUTPUT_HEIGHT':home_folder+'/height.tif',
+    'OUTPUT_ASPECT':home_folder+'/aspect.tif'})
     
 ################################################################################
-    
+# run SOLWEIG
 
-    
-    
-    
+processing.run("umep:Outdoor Thermal Comfort: SOLWEIG", 
+    {'INPUT_DSM':home_folder+'/DSM_clipped.tif',
+    'INPUT_SVF':home_folder+'\\svfs.zip',
+    'INPUT_HEIGHT':home_folder+'/height.tif',
+    'INPUT_ASPECT':home_folder+'/aspect.tif',
+    'USE_VEG':True,
+    'TRANS_VEG':3,
+    'INPUT_CDSM':home_folder+'/CDSM_clipped.tif',
+    'TSDM_EXIST':False,
+    'INPUT_TDSM':None,
+    'INPUT_THEIGHT':25,
+    'USE_LC':False,
+    'INPUT_LC':None,
+    'USE_LC_BUILD':False,
+    'INPUT_DEM':home_folder+'/DEM_clipped.tif',
+    'SAVE_BUILD':False,
+    'USE_ANISO':False,
+    'INPUT_ANISO':'',
+    'ALBEDO_WALLS':0.2,
+    'ALBEDO_GROUND':0.15,
+    'EMIS_WALLS':0.9,
+    'EMIS_GROUND':0.95,
+    'ABS_S':0.7,
+    'ABS_L':0.95,
+    'POSTURE':0,
+    'CYL':True,
+    'INPUTMET':home_folder+'\\metfile_20190105_20190108.txt',
+    'ONLYGLOBAL':False,
+    'UTC':0,
+    'POI':False,
+    'POI_FILE':None,
+    'POI_FIELD':'',
+    'AGE':35,
+    'ACTIVITY':80,
+    'CLO':0.9,
+    'WEIGHT':75,
+    'HEIGHT':180,
+    'SEX':0,
+    'SENSOR_HEIGHT':10,
+    'OUTPUT_TMRT':True,
+    'OUTPUT_KDOWN':True,
+    'OUTPUT_KUP':False,
+    'OUTPUT_LDOWN':False,
+    'OUTPUT_LUP':False,
+    'OUTPUT_SH':False,
+    'OUTPUT_DIR':home_folder+'\\SOLWEIG_output'})
+
     
     
     
