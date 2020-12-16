@@ -275,12 +275,18 @@ for file_in,file_out in zip(files_in,files_out):
         'DATA_TYPE':0,
         'EXTRA':'',
         'OUTPUT':file_out})
+################################################################################
+# Addition of DEM to DSM and CDSM following advice of F.Lindberg
+processing.run("gdal:rastercalculator", {'INPUT_A':home_folder+'/DSM_clipped.tif','BAND_A':1,'INPUT_B':home_folder+'/DEM_clipped.tif','BAND_B':None,'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,'FORMULA':'A+B','NO_DATA':None,'RTYPE':5,'OPTIONS':'','EXTRA':'','OUTPUT':home_folder+'/DSM_clipped_addDEM.tif'})
+
+processing.run("gdal:rastercalculator", {'INPUT_A':home_folder+'/CDSM_clipped.tif','BAND_A':1,'INPUT_B':home_folder+'/DEM_clipped.tif','BAND_B':None,'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,'FORMULA':'A+B','NO_DATA':None,'RTYPE':5,'OPTIONS':'','EXTRA':'','OUTPUT':home_folder+'/CDSM_clipped_addDEM.tif'})
+
 
 ################################################################################
 # generation of sky view factors
 
 processing.run("umep:Urban Geometry: Sky View Factor", 
-    {'INPUT_DSM':home_folder+'/DSM_clipped.tif',
+    {'INPUT_DSM':home_folder+'/DSM_clipped_addDEM.tif',
     'USE_VEG':True,
     'TRANS_VEG':3,
     'INPUT_CDSM':home_folder+'/CDSM_clipped.tif',
@@ -293,7 +299,7 @@ processing.run("umep:Urban Geometry: Sky View Factor",
     
 
 processing.run("umep:Urban Geometry: Wall Height and Aspect", 
-    {'INPUT':home_folder+'/DSM_clipped.tif',
+    {'INPUT':home_folder+'/DSM_clipped_addDEM.tif',
     'ASPECT_BOOL':True,
     'INPUT_LIMIT':3,
     'OUTPUT_HEIGHT':home_folder+'/height.tif',
@@ -303,7 +309,7 @@ processing.run("umep:Urban Geometry: Wall Height and Aspect",
 # run SOLWEIG
 
 processing.run("umep:Outdoor Thermal Comfort: SOLWEIG", 
-    {'INPUT_DSM':home_folder+'/DSM_clipped.tif',
+    {'INPUT_DSM':home_folder+'/DSM_clipped_addDEM.tif',
     'INPUT_SVF':home_folder+'\\svfs.zip',
     'INPUT_HEIGHT':home_folder+'/height.tif',
     'INPUT_ASPECT':home_folder+'/aspect.tif',
