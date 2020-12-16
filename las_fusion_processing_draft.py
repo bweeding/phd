@@ -99,6 +99,13 @@ QgsApplication.processingRegistry().addProvider(fusion_provider)
 # sets home folder location
 home_folder = 'C:\\Users\\weedingb\\Desktop\\LAS_fusion_processing'
 
+import processing
+from processing.core.Processing import Processing
+Processing.initialize()
+
+for alg in QgsApplication.processingRegistry().algorithms():
+    print("{}:{} --> {}".format(alg.provider().name(), alg.name(), alg.displayName()))
+
 ################################################################################
 # Do this later, polyclipdata won't run if the shape file is loaded!?!?
 
