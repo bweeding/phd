@@ -93,9 +93,10 @@ from processing_umep.processing_umep_provider import ProcessingUMEPProvider
 umep_provider = ProcessingUMEPProvider()
 QgsApplication.processingRegistry().addProvider(umep_provider)
 
-# not working yet - posted on github
+# works!
 from processing_fusion.fusionProvider import FusionProvider
 fusion_provider = FusionProvider()
+fusion_provider.load()
 QgsApplication.processingRegistry().addProvider(fusion_provider)
 
 # sets home folder location
