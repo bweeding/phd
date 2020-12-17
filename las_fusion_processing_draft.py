@@ -88,10 +88,12 @@ app.initQgis()
 
 # import third party processing plugins
 sys.path.append(r'C:\Users\weedingb\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins')
+
 from processing_umep.processing_umep_provider import ProcessingUMEPProvider
 umep_provider = ProcessingUMEPProvider()
 QgsApplication.processingRegistry().addProvider(umep_provider)
 
+# not working yet - posted on github
 from processing_fusion.fusionProvider import FusionProvider
 fusion_provider = FusionProvider()
 QgsApplication.processingRegistry().addProvider(fusion_provider)
