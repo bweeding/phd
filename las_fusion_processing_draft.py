@@ -96,7 +96,6 @@ QgsApplication.processingRegistry().addProvider(umep_provider)
 # works!
 from processing_fusion.fusionProvider import FusionProvider
 fusion_provider = FusionProvider()
-fusion_provider.load()
 QgsApplication.processingRegistry().addProvider(fusion_provider)
 
 # sets home folder location
@@ -146,8 +145,8 @@ dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 
 processing.run("fusion:dtm2tif", {'INPUT':'C:\\Users\\weedingb\\Desktop\\LAS_fusion_processing\\DEM.dtm','MASK':False,'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif'})
 
-processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
-
+processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif','CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
+# apparently should use warp (reporject) to do this?
 ################################################################################
 # Process the las files
 
