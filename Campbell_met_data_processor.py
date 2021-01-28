@@ -75,20 +75,23 @@ fig.legend(bbox_to_anchor=(1,1), bbox_transform=ax.transAxes)
  + geom_bar(size=20) # defining the type of plot to use
 )
 
+data_ext=sub_data_0[["TIMESTAMP","globe_temp_C","AirTC","mean_radiant_temp_C"]].copy()
 
+data_ext = data_ext.set_index("TIMESTAMP").stack()
 
-(ggplot(sub_data_0, aes(x='TIMESTAMP')) +       # Create ggplot2 plot
-  geom_line(aes(y = 'globe_temp_C'), color = "globe_temp_C") +
-  geom_line(aes(y ='AirTC'), color = "AirTC")# +
-  #scale_colour_manual(values=c("globe_temp_c"="red","AirTC"="blue"),breaks = c("globe_temp_c","AirTC"))
-)
+data_ext = pd.DataFrame(data_ext)
 
-(ggplot(sub_data_0,            # Create ggplot2 plot
-  aes(x = ,
-  y = value,
-  color = variable)) +
-  geom_line()
-)
+data_ext = data_ext.reset_index()
+
+data_ext.rename(columns = {0:"values","level_1":"measurements"},inplace=True)
+
+(ggplot(data_ext, aes(x = "TIMESTAMP", y = "values")) + 
+  geom_line(aes(color = "measurements", linetype = "measurements"))# + 
+  #scale_color_manual(values = c("darkred", "steelblue"))
+)  
+  
+  
+  
 
 
 
