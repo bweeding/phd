@@ -13,6 +13,9 @@ import time
 from plotnine import *
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.cbook as cbook
+from mizani.breaks import date_breaks
+from mizani.formatters import date_format
 
 #%% declare functions
 
@@ -50,7 +53,7 @@ sub_data_0 = data_0.iloc[1:101,:].copy()
 sub_data_0['TIMESTAMP'] = pd.to_datetime(sub_data_0['TIMESTAMP'])
 
 
-#%% plot data
+#%% plot data in matplotlib
 
 fig,ax = plt.subplots()
 
@@ -60,20 +63,23 @@ ax.plot(sub_data_0['TIMESTAMP'],sub_data_0['globe_temp_C'],label="Globe")
 ax.plot(sub_data_0['TIMESTAMP'],sub_data_0['AirTC'],label="Air")
 ax.plot(sub_data_0['TIMESTAMP'],sub_data_0['mean_radiant_temp_C'],label="Radiant")
 ax.set_ylabel('°C')
-ax.fmt_xdata = mdates.DateFormatter('%H')
+
 
 ax2=ax.twinx()
 ax2.plot(sub_data_0['TIMESTAMP'],sub_data_0['WS_ms'],label="Windspeed",linestyle="dashed")
 ax2.set_ylabel('m/s')
-#ax2.fmt_xdata = mdates.DateFormatter('%M:%S')
+
+
+ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M')) 
 
 fig.legend(bbox_to_anchor=(1,1), bbox_transform=ax.transAxes)
 
+#%% plot data in plotnine/ggplot
 
-(ggplot(sub_data_0)         # defining what data to use
- + aes(x='class')    # defining what variable to use
- + geom_bar(size=20) # defining the type of plot to use
-)
+# (ggplot(sub_data_0)         # defining what data to use
+#  + aes(x='class')    # defining what variable to use
+#  + geom_bar(size=20) # defining the type of plot to use
+# )
 
 data_ext=sub_data_0[["TIMESTAMP","globe_temp_C","AirTC","mean_radiant_temp_C"]].copy()
 
@@ -86,7 +92,8 @@ data_ext = data_ext.reset_index()
 data_ext.rename(columns = {0:"values","level_1":"measurements"},inplace=True)
 
 (ggplot(data_ext, aes(x = "TIMESTAMP", y = "values")) + 
-  geom_line(aes(color = "measurements", linetype = "measurements"))# + 
+  geom_line(aes(color = "measurements", linetype = "measurements")) +
+  scale_x_datetime(breaks=date_breaks('15 minutes'), labels=date_format('%HH:%MM'))# + 
   #scale_color_manual(values = c("darkred", "steelblue"))
 )  
   
