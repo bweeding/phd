@@ -34,7 +34,9 @@ def mrt_C(globe_temp_C,windspeed_ms,air_temp_C,globe_diameter_mm=150,globe_emiss
 os.chdir('C:/Campbellsci/PC200W')
 
 # read in data from Campbell CR1000
-data_0 = pd.read_csv('C:/Campbellsci/PC200W/CR1000_33158_METdata_trial_190121.dat',header=[1],skiprows=[2,3])
+#data_0 = pd.read_csv('C:/Campbellsci/PC200W/CR1000_33158_METdata_trial_190121.dat',header=[1],skiprows=[2,3])
+
+data_0 = pd.read_csv('C:/Campbellsci/PC200W/CR1000_27599_METdata_trial_190121.dat',header=[1],skiprows=[2,3])
 
 data_0.set_index('RECORD')
 
@@ -42,12 +44,14 @@ data_0.set_index('RECORD')
 data_0['globe_temp_C'] = -20 + 2*data_0['Pulse']
 
 # insert the measured windspeeds from the fan
-data_0.loc[data_0.index[31:48], ['WS_ms']] = 2.8
+#data_0.loc[data_0.index[31:48], ['WS_ms']] = 2.8
 
 # add mean radiant temperature to the dataframe
 data_0['mean_radiant_temp_C'] = mrt_C(data_0['globe_temp_C'],data_0['WS_ms'],data_0['AirTC'])
 
-sub_data_0 = data_0.iloc[1:101,:].copy()
+sub_data_0 = data_0.iloc[1::,:].copy()
+
+#sub_data_0 = data_0.copy()
 
 # convert strings to datetimes
 sub_data_0['TIMESTAMP'] = pd.to_datetime(sub_data_0['TIMESTAMP'])
@@ -66,8 +70,11 @@ ax.set_ylabel('°C')
 
 
 ax2=ax.twinx()
-ax2.plot(sub_data_0['TIMESTAMP'],sub_data_0['WS_ms'],label="Windspeed",linestyle="dashed")
-ax2.set_ylabel('m/s')
+#ax2.plot(sub_data_0['TIMESTAMP'],sub_data_0['WS_ms'],label="Windspeed",linestyle="dashed")
+#ax2.set_ylabel('m/s')
+
+ax2.plot(sub_data_0['TIMESTAMP'],sub_data_0['SlrW'],label="SW radiation D",linestyle="dashed")
+ax2.set_ylabel('W/m^2')
 
 
 ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M')) 
