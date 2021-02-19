@@ -59,27 +59,45 @@ sub_data_0['TIMESTAMP'] = pd.to_datetime(sub_data_0['TIMESTAMP'])
 
 #%% plot data in matplotlib
 
-fig,ax = plt.subplots()
+fig, axs = plt.subplots(2, 1, sharex=True, sharey=False)
 
 #fig.autofmt_xdate()
 
-ax.plot(sub_data_0['TIMESTAMP'],sub_data_0['globe_temp_C'],label="Globe")
-ax.plot(sub_data_0['TIMESTAMP'],sub_data_0['AirTC'],label="Air")
-ax.plot(sub_data_0['TIMESTAMP'],sub_data_0['mean_radiant_temp_C'],label="Radiant")
-ax.set_ylabel('°C')
 
 
-ax2=ax.twinx()
-#ax2.plot(sub_data_0['TIMESTAMP'],sub_data_0['WS_ms'],label="Windspeed",linestyle="dashed")
-#ax2.set_ylabel('m/s')
+axs[0].plot(sub_data_0['TIMESTAMP'],sub_data_0['globe_temp_C'],label="Globe",color="black")
+axs[0].plot(sub_data_0['TIMESTAMP'],sub_data_0['AirTC'],label="Air",color="gold")
+axs[0].plot(sub_data_0['TIMESTAMP'],sub_data_0['mean_radiant_temp_C'],label="Radiant",color="firebrick")
+axs[0].set_ylabel('°C')
+axs[0].set_ylim([10,50])
+axs[0].yaxis.set_ticks(np.linspace(10,50,5))
+axs[0].grid()
 
-ax2.plot(sub_data_0['TIMESTAMP'],sub_data_0['SlrW'],label="SW radiation D",linestyle="dashed")
-ax2.set_ylabel('W/m^2')
+axs[0].set_xlim([sub_data_0['TIMESTAMP'][1],sub_data_0['TIMESTAMP'].iloc[-1]])
+
+axs[1].plot(sub_data_0['TIMESTAMP'],sub_data_0['WS_ms'],label="Windspeed",color="seagreen")
+axs[1].set_ylabel('m/s')
+axs[1].grid()
+axs[1].set_ylim([0,4])
+
+axs2=axs[1].twinx()
+axs2.plot(sub_data_0['TIMESTAMP'],sub_data_0['RH'],label="Relative humidity",color="cornflowerblue")
+axs2.set_ylabel('%')
+axs2.set_ylim([0,80])
+
+# ax2.plot(sub_data_0['TIMESTAMP'],sub_data_0['SlrW'],label="SW radiation D",linestyle="dashed")
+# ax2.set_ylabel('W/m^2')
 
 
-ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M')) 
+axs[1].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M')) 
 
-fig.legend(bbox_to_anchor=(1,1), bbox_transform=ax.transAxes)
+#axs[0].legend(bbox_to_anchor=(1,1), bbox_transform=ax.transAxes)
+
+axs[0].legend(loc='upper center', bbox_to_anchor=(0.5, 1.3),ncol=3)
+
+axs[1].legend(loc='upper center', bbox_to_anchor=(0.25, -0.2),ncol=1)
+
+axs2.legend(loc='upper center', bbox_to_anchor=(0.65, -0.2),ncol=1)
 
 #%% plot data in plotnine/ggplot
 
