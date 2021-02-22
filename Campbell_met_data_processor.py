@@ -78,12 +78,13 @@ axs[0].set_xlim([sub_data_0['TIMESTAMP'][1],sub_data_0['TIMESTAMP'].iloc[-1]])
 axs[1].plot(sub_data_0['TIMESTAMP'],sub_data_0['WS_ms'],label="Windspeed",color="seagreen")
 axs[1].set_ylabel('m/s')
 axs[1].grid()
-axs[1].set_ylim([0,4])
+axs[1].set_ylim([0,5])
+axs[1].yaxis.set_ticks(np.linspace(0,5,6))
 
 axs2=axs[1].twinx()
 axs2.plot(sub_data_0['TIMESTAMP'],sub_data_0['RH'],label="Relative humidity",color="cornflowerblue")
 axs2.set_ylabel('%')
-axs2.set_ylim([0,80])
+axs2.set_ylim([0,100])
 
 # ax2.plot(sub_data_0['TIMESTAMP'],sub_data_0['SlrW'],label="SW radiation D",linestyle="dashed")
 # ax2.set_ylabel('W/m^2')
@@ -98,6 +99,67 @@ axs[0].legend(loc='upper center', bbox_to_anchor=(0.5, 1.3),ncol=3)
 axs[1].legend(loc='upper center', bbox_to_anchor=(0.25, -0.2),ncol=1)
 
 axs2.legend(loc='upper center', bbox_to_anchor=(0.65, -0.2),ncol=1)
+
+arrow_size = 7
+
+fig.text(0.155, 0.5, "Wed " , ha="center", va="center", rotation=0, size=arrow_size,
+    bbox=dict(boxstyle="darrow,pad=0.3", fc="w", ec="black"))
+
+
+fig.text(0.27, 0.5, "        Thur        ", ha="center", va="center", rotation=0, size=arrow_size,
+    bbox=dict(boxstyle="darrow,pad=0.3", fc="w", ec="black"))
+
+fig.text(0.43, 0.5, "          Fri          ", ha="center", va="center", rotation=0, size=arrow_size,
+    bbox=dict(boxstyle="darrow,pad=0.3", fc="w", ec="black"))
+
+
+fig.text(0.59, 0.5, "          Sat        ", ha="center", va="center", rotation=0, size=arrow_size,
+    bbox=dict(boxstyle="darrow,pad=0.3", fc="w", ec="black"))
+
+
+fig.text(0.745, 0.5, "         Sun        ", ha="center", va="center", rotation=0, size=arrow_size,
+    bbox=dict(boxstyle="darrow,pad=0.3", fc="w", ec="black"))
+
+fig.text(0.865, 0.5, " Mon ", ha="center", va="center", rotation=0, size=arrow_size,
+    bbox=dict(boxstyle="darrow,pad=0.3", fc="w", ec="black"))
+
+fig.text(0.15, 0.94, "Starting 17/02", ha="center", va="center", rotation=0, size=10,
+    bbox=dict(boxstyle="round4,pad=0.3", fc="w", ec="black"))
+
+
+#%%
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+time_idx = sub_data_0['TIMESTAMP']
+
+# Create figure with secondary y-axis
+fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+# Add traces
+fig.add_trace(
+    go.Scatter(x=time_idx, y=sub_data_0['globe_temp_C'], name="yaxis data"),
+    secondary_y=False,
+)
+
+fig.add_trace(
+    go.Scatter(x=time_idx, y=sub_data_0['WS_ms'], name="yaxis2 data"),
+    secondary_y=True,
+)
+
+# Add figure title
+fig.update_layout(
+    title_text="Double Y Axis Example"
+)
+
+# Set x-axis title
+fig.update_xaxes(title_text="xaxis title")
+
+# Set y-axes titles
+fig.update_yaxes(title_text="<b>primary</b> yaxis title", secondary_y=False)
+fig.update_yaxes(title_text="<b>secondary</b> yaxis title", secondary_y=True)
+
+fig.show()
 
 #%% plot data in plotnine/ggplot
 
