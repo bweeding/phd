@@ -4,18 +4,16 @@ Created on Fri Mar 12 12:37:31 2021
 
 @author: weedingb
 """
+#%% inputs to add
+#home_folder
+
 
 #%% debug from here
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Dec 16 14:12:35 2020
 
-@author: weedingb
-"""
-
+import sys
 from qgis import processing
 from qgis.core import QgsApplication
-import sys
+
 
 
 # Initiating a QGIS application
@@ -23,6 +21,10 @@ qgishome = 'C:/Program Files/QGIS 3.16/apps/qgis/'
 QgsApplication.setPrefixPath(qgishome, True)
 app = QgsApplication([], False)
 app.initQgis()
+
+#import processing
+from processing.core.Processing import Processing
+Processing.initialize()
 
 # import third party processing plugins
 sys.path.append(r'C:\Users\weedingb\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins')
@@ -39,11 +41,10 @@ fusion_provider = FusionProvider()
 QgsApplication.processingRegistry().addProvider(fusion_provider)
 
 # sets home folder location
-home_folder = 'C:\\Users\\weedingb\\Desktop\\LAS_fusion_processing'
+home_folder = 'C:\\Users\\weedingb\\Desktop\\utas_solweig_run'
 
-import processing
-from processing.core.Processing import Processing
-Processing.initialize()
+
+
 
 for alg in QgsApplication.processingRegistry().algorithms():
     print("{}:{} --> {}".format(alg.provider().name(), alg.name(), alg.displayName()))
@@ -60,10 +61,13 @@ for alg in QgsApplication.processingRegistry().algorithms():
 ################################################################################
 
 # specifies the location of the current las file and buildings file
-las_loc = home_folder+'\\ClimateFuturesDerwent2008-C2-AHD_5265251_55.las'
+# should it just auto select a .las file? How will we structure? 
+# depends on run time!
+las_loc = home_folder+'\\ClimateFuturesDerwent2008-C2-AHD_5265249_55.las'
 
 build_loc = home_folder+'\\list_2d_building_polys_hobart.shp'
 
+#%%
 # creates a DEM (grid surface create class 2)
 alg_params_DEM = {
     'ADVANCED_MODIFIERS': '',
@@ -87,7 +91,7 @@ processing.run("fusion:dtm2tif", {'INPUT':'C:\\Users\\weedingb\\Desktop\\LAS_fus
 
 processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif','CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
 # apparently should use warp (reporject) to do this?
-################################################################################
+#%%
 # Process the las files
 
 # ground_outside_b.las
@@ -130,7 +134,7 @@ alg_params_buildings_inside_b = {
 }
 buildings_inside_b = processing.run('fusion:pollyclipdata', alg_params_buildings_inside_b)   
 
-################################################################################
+#%%
 
 # DSM
 alg_params_dsm = {
@@ -153,13 +157,13 @@ DSM = processing.run('fusion:canopymodel', alg_params_dsm)
 # convert to tif, then set projection?
 
 processing.run("gdal:translate", 
-{'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM.asc',
-'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
+{'INPUT':home_folder+'/DSM.asc',
+'TARGET_CRS':'QgsCoordinateReferenceSystem("EPSG:28355")',
 'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,
-'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DSM.tif'})
+'OUTPUT':home_folder+'/DSM.tif'})
 
 
-################################################################################
+#%%
 
 # Convert extent of DSM to a shapefile
 alg_params_extent = {
@@ -167,6 +171,8 @@ alg_params_extent = {
     'OUTPUT':home_folder+'\\DSM_extent.shp'
 }
 
+#QgsProcessingException: Error: Algorithm native:polygonfromlayerextent not found
+# "extract layer extent"
 extent = processing.run('native:polygonfromlayerextent',alg_params_extent)
 
 # extract vegetation above 2.5m
@@ -203,12 +209,12 @@ alg_params_cdsm = {
 CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)  
 
 processing.run("gdal:translate", 
-{'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM.asc',
+{'INPUT':home_folder+'/CDSM.asc',
 'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
 'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,
-'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM.tif'})
+'OUTPUT':home_folder+'/CDSM.tif'})
 
-################################################################################
+#%%
 
 # building_footprint_buffered
 alg_params_buildings_buffered = {
@@ -261,7 +267,7 @@ buildings_buffered_raster = processing.run('gdal:rasterize', alg_params_building
 
 #layer2 = QgsRasterLayer(home_folder+'\\CDSM.asc', 'CDSM')
 
-################################################################################
+#%%
 
 # try alternative algorithm
 
@@ -280,7 +286,7 @@ alg_params_cdsm_filt1 = {
 
 cdsm_filt1 = processing.run("gdal:rastercalculator", alg_params_cdsm_filt1)
 
-################################################################################
+#%%
 
 #layer3 = QgsRasterLayer(home_folder+'\\CDSM_filt1.tif','CDSM_filt1')
 
@@ -300,7 +306,7 @@ processing.run("gdal:rastercalculator", alg_params_cdsm_filt2)
 processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt2.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
 
 # clip files for processing speed on my machine
-################################################################################
+#%%
 
 files_in = [home_folder+'/CDSM_filt2.tif',
             home_folder+'/DEM.tif',
@@ -320,14 +326,14 @@ for file_in,file_out in zip(files_in,files_out):
         'DATA_TYPE':0,
         'EXTRA':'',
         'OUTPUT':file_out})
-################################################################################
+#%%
 # Addition of DEM to DSM and CDSM following advice of F.Lindberg
 processing.run("gdal:rastercalculator", {'INPUT_A':home_folder+'/DSM_clipped.tif','BAND_A':1,'INPUT_B':home_folder+'/DEM_clipped.tif','BAND_B':None,'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,'FORMULA':'A+B','NO_DATA':None,'RTYPE':5,'OPTIONS':'','EXTRA':'','OUTPUT':home_folder+'/DSM_clipped_addDEM.tif'})
 
 processing.run("gdal:rastercalculator", {'INPUT_A':home_folder+'/CDSM_clipped.tif','BAND_A':1,'INPUT_B':home_folder+'/DEM_clipped.tif','BAND_B':None,'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,'FORMULA':'A+B','NO_DATA':None,'RTYPE':5,'OPTIONS':'','EXTRA':'','OUTPUT':home_folder+'/CDSM_clipped_addDEM.tif'})
 
 
-################################################################################
+#%%
 # generation of sky view factors
 
 processing.run("umep:Urban Geometry: Sky View Factor", 
@@ -350,7 +356,7 @@ processing.run("umep:Urban Geometry: Wall Height and Aspect",
     'OUTPUT_HEIGHT':home_folder+'/height.tif',
     'OUTPUT_ASPECT':home_folder+'/aspect.tif'})
     
-################################################################################
+#%%
 # run SOLWEIG
 
 processing.run("umep:Outdoor Thermal Comfort: SOLWEIG", 
