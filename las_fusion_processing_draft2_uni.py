@@ -13,7 +13,7 @@ Created on Fri Mar 12 12:37:31 2021
 import sys
 from qgis import processing
 from qgis.core import QgsApplication
-
+from qgis.analysis import QgsNativeAlgorithms
 
 
 # Initiating a QGIS application
@@ -25,6 +25,7 @@ app.initQgis()
 #import processing
 from processing.core.Processing import Processing
 Processing.initialize()
+QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
 
 # import third party processing plugins
 sys.path.append(r'C:\Users\weedingb\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins')
@@ -87,7 +88,7 @@ alg_params_DEM = {
     
 dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 
-processing.run("fusion:dtm2tif", {'INPUT':'C:\\Users\\weedingb\\Desktop\\LAS_fusion_processing\\DEM.dtm','MASK':False,'OUTPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif'})
+processing.run("fusion:dtm2tif", {'INPUT':home_folder+'/DEM.dtm','MASK':False,'OUTPUT':home_folder+'/DEM.tif'})
 
 processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif','CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
 # apparently should use warp (reporject) to do this?
@@ -210,7 +211,7 @@ CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)
 
 processing.run("gdal:translate", 
 {'INPUT':home_folder+'/CDSM.asc',
-'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
+'TARGET_CRS':'QgsCoordinateReferenceSystem("EPSG:28355")',
 'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,
 'OUTPUT':home_folder+'/CDSM.tif'})
 
@@ -303,7 +304,7 @@ alg_params_cdsm_filt2 = {
 
 processing.run("gdal:rastercalculator", alg_params_cdsm_filt2)
 
-processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt2.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
+processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt2.tif','CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
 
 # clip files for processing speed on my machine
 #%%
