@@ -14,7 +14,7 @@ import sys
 from qgis import processing
 from qgis.core import QgsApplication
 from qgis.analysis import QgsNativeAlgorithms
-import pylas
+
 
 # Initiating a QGIS application
 qgishome = 'C:/Program Files/QGIS 3.16/apps/qgis/'
@@ -44,7 +44,7 @@ QgsApplication.processingRegistry().addProvider(fusion_provider)
 # sets home folder location
 home_folder = 'C:\\Users\\weedingb\\Desktop\\utas_solweig_run'
 
-
+las_loc = 'C:\\Users\\weedingb\\Desktop\\utas_solweig_run\\MountWellingtonRiverDerwent2010_5265249_55_001_001.las'
 
 
 for alg in QgsApplication.processingRegistry().algorithms():
@@ -64,7 +64,7 @@ for alg in QgsApplication.processingRegistry().algorithms():
 # specifies the location of the current las file and buildings file
 # should it just auto select a .las file? How will we structure? 
 # depends on run time!
-las_loc = home_folder+'\\MountWellingtonRiverDerwent2010_5265249_55_001_001.laz'
+las_loc = home_folder+'\\MountWellingtonRiverDerwent2010_5265249_55_001_001.las'
 
 build_loc = home_folder+'\\list_2d_building_polys_hobart.shp'
 
@@ -90,7 +90,7 @@ dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 
 processing.run("fusion:dtm2tif", {'INPUT':home_folder+'/DEM.dtm','MASK':False,'OUTPUT':home_folder+'/DEM.tif'})
 
-processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/DEM.tif','CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
+processing.run("gdal:assignprojection", {'INPUT':home_folder+'/DEM.tif','CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
 # apparently should use warp (reporject) to do this?
 #%%
 # Process the las files
@@ -155,7 +155,7 @@ alg_params_dsm = {
 }
 DSM = processing.run('fusion:canopymodel', alg_params_dsm)    
 
-# convert to tif, then set projection?
+# convert to tif, then set projection? doesn't seem to be working!
 
 processing.run("gdal:translate", 
 {'INPUT':home_folder+'/DSM.asc',
@@ -163,6 +163,9 @@ processing.run("gdal:translate",
 'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,
 'OUTPUT':home_folder+'/DSM.tif'})
 
+processing.run("gdal:assignprojection",
+               {'INPUT':home_folder+'/DSM.tif',
+                'CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
 
 #%%
 
@@ -207,13 +210,17 @@ alg_params_cdsm = {
     'ZUNITS': 0,
     'OUTPUT': home_folder+'\\CDSM.tif'
 }
+#also produces CDSM.asc
 CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)  
 
-processing.run("gdal:translate", 
-{'INPUT':home_folder+'/CDSM.asc',
-'TARGET_CRS':'QgsCoordinateReferenceSystem("EPSG:28355")',
-'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,
-'OUTPUT':home_folder+'/CDSM.tif'})
+processing.run("gdal:assignprojection",
+               {'INPUT':home_folder+'\\CDSM.tif',
+                'CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
+
+processing.run("gdal:assignprojection",
+               {'INPUT':home_folder+'\\CDSM.asc',
+                'CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
+
 
 #%%
 
@@ -268,7 +275,7 @@ buildings_buffered_raster = processing.run('gdal:rasterize', alg_params_building
 
 #layer2 = QgsRasterLayer(home_folder+'\\CDSM.asc', 'CDSM')
 
-#%%
+#%% NOT producing output!?!? Need to set coordinates of CDSM?
 
 # try alternative algorithm
 
@@ -304,7 +311,7 @@ alg_params_cdsm_filt2 = {
 
 processing.run("gdal:rastercalculator", alg_params_cdsm_filt2)
 
-processing.run("gdal:assignprojection", {'INPUT':'C:/Users/weedingb/Desktop/LAS_fusion_processing/CDSM_filt2.tif','CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
+processing.run("gdal:assignprojection", {'INPUT':home_folder+'/CDSM_filt2.tif','CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
 
 # clip files for processing speed on my machine
 #%%
@@ -321,7 +328,7 @@ for file_in,file_out in zip(files_in,files_out):
 
     processing.run("gdal:cliprasterbyextent", 
         {'INPUT':file_in,
-        'PROJWIN':'526621.235200000,526944.986000000,5251548.877400000,5251767.751100000 [EPSG:28355]',
+        'PROJWIN':'526402.3861,526823.6200,5249680.3568,5249998.3634 [EPSG:28355]',
         'NODATA':None,
         'OPTIONS':'',
         'DATA_TYPE':0,
