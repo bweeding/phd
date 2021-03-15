@@ -14,7 +14,7 @@ import sys
 from qgis import processing
 from qgis.core import QgsApplication
 from qgis.analysis import QgsNativeAlgorithms
-
+import pylas
 
 # Initiating a QGIS application
 qgishome = 'C:/Program Files/QGIS 3.16/apps/qgis/'
@@ -64,7 +64,7 @@ for alg in QgsApplication.processingRegistry().algorithms():
 # specifies the location of the current las file and buildings file
 # should it just auto select a .las file? How will we structure? 
 # depends on run time!
-las_loc = home_folder+'\\ClimateFuturesDerwent2008-C2-AHD_5265249_55.las'
+las_loc = home_folder+'\\MountWellingtonRiverDerwent2010_5265249_55_001_001.laz'
 
 build_loc = home_folder+'\\list_2d_building_polys_hobart.shp'
 
