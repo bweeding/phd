@@ -13,6 +13,8 @@ Created on Fri Mar 12 12:37:31 2021
 import sys
 from qgis import processing
 from qgis.core import QgsApplication
+from qgis.core import QgsCoordinateReferenceSystem
+from qgis.core import QgsProject
 from qgis.analysis import QgsNativeAlgorithms
 
 
@@ -21,6 +23,8 @@ qgishome = 'C:/Program Files/QGIS 3.16/apps/qgis/'
 QgsApplication.setPrefixPath(qgishome, True)
 app = QgsApplication([], False)
 app.initQgis()
+
+QgsProject.instance().setCrs(QgsCoordinateReferenceSystem('EPSG:28355'))
 
 #import processing
 from processing.core.Processing import Processing
@@ -90,8 +94,10 @@ dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 
 processing.run("fusion:dtm2tif", {'INPUT':home_folder+'/DEM.dtm','MASK':False,'OUTPUT':home_folder+'/DEM.tif'})
 
-processing.run("gdal:assignprojection", {'INPUT':home_folder+'/DEM.tif','CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
+processing.run("gdal:assignprojection", {'INPUT':home_folder+'/DEM.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
 # apparently should use warp (reporject) to do this?
+#processing.run("gdal:warpreproject", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DEM_nopro.tif','SOURCE_CRS':None,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'RESAMPLING':0,'NODATA':None,'TARGET_RESOLUTION':None,'OPTIONS':'','DATA_TYPE':0,'TARGET_EXTENT':None,'TARGET_EXTENT_CRS':None,'MULTITHREADING':False,'EXTRA':'','OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DEM.tif'})
+
 #%%
 # Process the las files
 
@@ -194,7 +200,7 @@ alg_params_veg_outside_b_zmin2_5 = {
 }
 veg_outside_b_zmin2_5 = processing.run('fusion:clipdata', alg_params_veg_outside_b_zmin2_5)
 
-# CDSM
+# CDSM - sticking point!!! .asc seems ok but .tif isn't?
 alg_params_cdsm = {
     'ADVANCED_MODIFIERS': '',
     'ASCII': True,
@@ -208,18 +214,20 @@ alg_params_cdsm = {
     'VERSION64': True,
     'XYUNITS': 0,
     'ZUNITS': 0,
-    'OUTPUT': home_folder+'\\CDSM.tif'
+    'OUTPUT': home_folder+'\\CDSM.asc'
 }
 #also produces CDSM.asc
 CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)  
 
-processing.run("gdal:assignprojection",
-               {'INPUT':home_folder+'\\CDSM.tif',
-                'CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
+processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.asc','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif'})
 
-processing.run("gdal:assignprojection",
-               {'INPUT':home_folder+'\\CDSM.asc',
-                'CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
+# processing.run("gdal:assignprojection",
+#                {'INPUT':home_folder+'\\CDSM.tif',
+#                 'CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
+
+# processing.run("gdal:assignprojection",
+#                {'INPUT':home_folder+'\\CDSM.asc',
+#                 'CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
 
 
 #%%
