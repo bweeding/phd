@@ -11,6 +11,7 @@ Created on Fri Mar 12 12:37:31 2021
 #%% debug from here
 
 import sys
+import os
 from qgis import processing
 from qgis.core import QgsApplication
 from qgis.core import QgsCoordinateReferenceSystem
@@ -96,10 +97,7 @@ dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 
 processing.run("fusion:dtm2tif", {'INPUT':home_folder+'/DEM.dtm','MASK':False,'OUTPUT':home_folder+'/DEM.tif'})
 
-processing.run("gdal:assignprojection", {'INPUT':home_folder+'/DEM.tif','CRS':QgsCoordinateReferenceSystem("EPSG:28355")})
-# apparently should use warp (reporject) to do this?
-#processing.run("gdal:warpreproject", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DEM_nopro.tif','SOURCE_CRS':None,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'RESAMPLING':0,'NODATA':None,'TARGET_RESOLUTION':None,'OPTIONS':'','DATA_TYPE':0,'TARGET_EXTENT':None,'TARGET_EXTENT_CRS':None,'MULTITHREADING':False,'EXTRA':'','OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DEM.tif'})
-
+os.system('python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 C:/Users/weedingb/Desktop/utas_solweig_run/DEM.tif')
 #%%
 # Process the las files
 
@@ -161,19 +159,14 @@ alg_params_dsm = {
     'ZUNITS': 0,
     'OUTPUT': home_folder+'\\DSM.asc'
 }
-DSM = processing.run('fusion:canopymodel', alg_params_dsm)    
+DSM = processing.run('fusion:canopymodel', alg_params_dsm)   
 
-# convert to tif, then set projection? doesn't seem to be working!
+#processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.asc','TARGET_CRS':None,'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.tif'}) 
 
-processing.run("gdal:translate", 
-{'INPUT':home_folder+'/DSM.asc',
-'TARGET_CRS':'QgsCoordinateReferenceSystem("EPSG:28355")',
-'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,
-'OUTPUT':home_folder+'/DSM.tif'})
+# Works! assigns crs on generation of tif
+processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.asc','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.tif'})
 
-processing.run("gdal:assignprojection",
-               {'INPUT':home_folder+'/DSM.tif',
-                'CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
+#os.system('python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 C:/Users/weedingb/Desktop/utas_solweig_run/DSM.tif')
 
 #%%
 
@@ -202,7 +195,7 @@ alg_params_veg_outside_b_zmin2_5 = {
 }
 veg_outside_b_zmin2_5 = processing.run('fusion:clipdata', alg_params_veg_outside_b_zmin2_5)
 
-# CDSM - sticking point!!! .asc seems ok but .tif isn't?
+
 alg_params_cdsm = {
     'ADVANCED_MODIFIERS': '',
     'ASCII': True,
@@ -223,13 +216,8 @@ CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)
 
 processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.asc','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif'})
 
-# processing.run("gdal:assignprojection",
-#                {'INPUT':home_folder+'\\CDSM.tif',
-#                 'CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
 
-# processing.run("gdal:assignprojection",
-#                {'INPUT':home_folder+'\\CDSM.asc',
-#                 'CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
+#os.system('python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif')
 
 
 #%%
@@ -279,15 +267,9 @@ alg_params_buildings_buffered_raster = {
 }
 buildings_buffered_raster = processing.run('gdal:rasterize', alg_params_buildings_buffered_raster)
 
-#need to load layers? Can it be done without loading? includ a .isValid() check!
 
-#layer1 = QgsRasterLayer(home_folder+'\\buildings_buffered_raster.tif', 'buildings_buffered_raster')
+#%% 
 
-#layer2 = QgsRasterLayer(home_folder+'\\CDSM.asc', 'CDSM')
-
-#%% NOT producing output!?!? Need to set coordinates of CDSM?
-
-# try alternative algorithm
 
 alg_params_cdsm_filt1 = {
     'INPUT_A':home_folder+'\\CDSM.tif',
@@ -311,24 +293,27 @@ cdsm_layer_loc = home_folder+'\\CDSM.tif'
 buildings_layer = QgsRasterLayer(home_folder+'\\buildings_buffered_raster.tif')
 buildings_layer_loc = home_folder+'\\buildings_buffered_raster.tif'
 
-alg_params = {
-     'CELLSIZE': 0,
-     'CRS':QgsCoordinateReferenceSystem("EPSG:28355"),
-     'EXPRESSION': f'{cdsm_layer_loc}@1*{buildings_layer_loc}@1',
-     'EXTENT': cdsm_extent,
-     'LAYERS': [cdsm_layer],
-     'OUTPUT': home_folder+'\\raster_multiplied.tif'
- }
+os.system('python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A*B" --format GTiff --type Float32 -A C:/Users/weedingb/Desktop/utas_solweig_run/buildings_buffered_raster.tif --A_band 1 -B C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif --outfile C:/Users/weedingb/Desktop/utas_solweig_run/CDSM_filt1.tif'
+)
 
-result = processing.run('qgis:rastercalculator', alg_params)
+# alg_params = {
+#      'CELLSIZE': 0,
+#      'CRS':QgsCoordinateReferenceSystem("EPSG:28355"),
+#      'EXPRESSION': f'{cdsm_layer_loc}@1*{buildings_layer_loc}@1',
+#      'EXTENT': cdsm_extent,
+#      'LAYERS': [cdsm_layer],
+#      'OUTPUT': home_folder+'\\raster_multiplied.tif'
+#  }
+
+# result = processing.run('qgis:rastercalculator', alg_params)
  
-processing.run("qgis:rastercalculator", 
-                {'EXPRESSION':'\"CDSM@1\" * \"buildings_buffered_raster@1\"',
-                 'LAYERS':['C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif'],
-                 'CELLSIZE':0,
-                 'EXTENT':None,
-                 'CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
-                 'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/rast_calc_output.tif'})
+# processing.run("qgis:rastercalculator", 
+#                 {'EXPRESSION':'\"CDSM@1\" * \"buildings_buffered_raster@1\"',
+#                  'LAYERS':['C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif'],
+#                  'CELLSIZE':0,
+#                  'EXTENT':None,
+#                  'CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
+#                  'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/rast_calc_output.tif'})
 
 #%%
 
