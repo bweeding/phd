@@ -15,6 +15,8 @@ from qgis import processing
 from qgis.core import QgsApplication
 from qgis.core import QgsCoordinateReferenceSystem
 from qgis.core import QgsProject
+from qgis.core import QgsRasterLayer
+from qgis.core import QgsProcessingFeedback
 from qgis.analysis import QgsNativeAlgorithms
 
 
@@ -94,7 +96,7 @@ dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 
 processing.run("fusion:dtm2tif", {'INPUT':home_folder+'/DEM.dtm','MASK':False,'OUTPUT':home_folder+'/DEM.tif'})
 
-processing.run("gdal:assignprojection", {'INPUT':home_folder+'/DEM.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
+processing.run("gdal:assignprojection", {'INPUT':home_folder+'/DEM.tif','CRS':QgsCoordinateReferenceSystem("EPSG:28355")})
 # apparently should use warp (reporject) to do this?
 #processing.run("gdal:warpreproject", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DEM_nopro.tif','SOURCE_CRS':None,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'RESAMPLING':0,'NODATA':None,'TARGET_RESOLUTION':None,'OPTIONS':'','DATA_TYPE':0,'TARGET_EXTENT':None,'TARGET_EXTENT_CRS':None,'MULTITHREADING':False,'EXTRA':'','OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DEM.tif'})
 
@@ -288,7 +290,7 @@ buildings_buffered_raster = processing.run('gdal:rasterize', alg_params_building
 # try alternative algorithm
 
 alg_params_cdsm_filt1 = {
-    'INPUT_A':home_folder+'\\CDSM.asc',
+    'INPUT_A':home_folder+'\\CDSM.tif',
     'BAND_A':1,
     'INPUT_B':home_folder+'\\buildings_buffered_raster.tif',
     'BAND_B':None,
@@ -301,6 +303,32 @@ alg_params_cdsm_filt1 = {
     'OUTPUT':home_folder+'\\CDSM_filt1.tif'}
 
 cdsm_filt1 = processing.run("gdal:rastercalculator", alg_params_cdsm_filt1)
+
+cdsm_layer = QgsRasterLayer(home_folder+'\\CDSM.tif')
+cdsm_extent = cdsm_layer.extent()
+cdsm_layer_loc = home_folder+'\\CDSM.tif'
+
+buildings_layer = QgsRasterLayer(home_folder+'\\buildings_buffered_raster.tif')
+buildings_layer_loc = home_folder+'\\buildings_buffered_raster.tif'
+
+alg_params = {
+     'CELLSIZE': 0,
+     'CRS':QgsCoordinateReferenceSystem("EPSG:28355"),
+     'EXPRESSION': f'{cdsm_layer_loc}@1*{buildings_layer_loc}@1',
+     'EXTENT': cdsm_extent,
+     'LAYERS': [cdsm_layer],
+     'OUTPUT': home_folder+'\\raster_multiplied.tif'
+ }
+
+result = processing.run('qgis:rastercalculator', alg_params)
+ 
+processing.run("qgis:rastercalculator", 
+                {'EXPRESSION':'\"CDSM@1\" * \"buildings_buffered_raster@1\"',
+                 'LAYERS':['C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif'],
+                 'CELLSIZE':0,
+                 'EXTENT':None,
+                 'CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
+                 'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/rast_calc_output.tif'})
 
 #%%
 
