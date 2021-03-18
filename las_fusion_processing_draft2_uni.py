@@ -271,27 +271,27 @@ buildings_buffered_raster = processing.run('gdal:rasterize', alg_params_building
 #%% 
 
 
-alg_params_cdsm_filt1 = {
-    'INPUT_A':home_folder+'\\CDSM.tif',
-    'BAND_A':1,
-    'INPUT_B':home_folder+'\\buildings_buffered_raster.tif',
-    'BAND_B':None,
-    'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,
-    'FORMULA':'A*B',
-    'NO_DATA':None,
-    'RTYPE':5,
-    'OPTIONS':'',
-    'EXTRA':'',
-    'OUTPUT':home_folder+'\\CDSM_filt1.tif'}
+# alg_params_cdsm_filt1 = {
+#     'INPUT_A':home_folder+'\\CDSM.tif',
+#     'BAND_A':1,
+#     'INPUT_B':home_folder+'\\buildings_buffered_raster.tif',
+#     'BAND_B':None,
+#     'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,
+#     'FORMULA':'A*B',
+#     'NO_DATA':None,
+#     'RTYPE':5,
+#     'OPTIONS':'',
+#     'EXTRA':'',
+#     'OUTPUT':home_folder+'\\CDSM_filt1.tif'}
 
-cdsm_filt1 = processing.run("gdal:rastercalculator", alg_params_cdsm_filt1)
+# cdsm_filt1 = processing.run("gdal:rastercalculator", alg_params_cdsm_filt1)
 
-cdsm_layer = QgsRasterLayer(home_folder+'\\CDSM.tif')
-cdsm_extent = cdsm_layer.extent()
-cdsm_layer_loc = home_folder+'\\CDSM.tif'
+# cdsm_layer = QgsRasterLayer(home_folder+'\\CDSM.tif')
+# cdsm_extent = cdsm_layer.extent()
+# cdsm_layer_loc = home_folder+'\\CDSM.tif'
 
-buildings_layer = QgsRasterLayer(home_folder+'\\buildings_buffered_raster.tif')
-buildings_layer_loc = home_folder+'\\buildings_buffered_raster.tif'
+# buildings_layer = QgsRasterLayer(home_folder+'\\buildings_buffered_raster.tif')
+# buildings_layer_loc = home_folder+'\\buildings_buffered_raster.tif'
 
 os.system('python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A*B" --format GTiff --type Float32 -A C:/Users/weedingb/Desktop/utas_solweig_run/buildings_buffered_raster.tif --A_band 1 -B C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif --outfile C:/Users/weedingb/Desktop/utas_solweig_run/CDSM_filt1.tif'
 )
