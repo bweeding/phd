@@ -25,3 +25,7 @@ C:\\Users\\weedingb\\Anaconda3\\envs\\qgis_env\\python -m gdal -c gdal_calc --ca
 cmd = 'python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A*B" --format GTiff --type Float32 -A C:/Users/weedingb/Desktop/utas_solweig_run/DSM.tif --A_band 1 -B C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif --outfile C:/Users/weedingb/Desktop/utas_solweig_run/multiplied.tif'
 
 os.system(cmd)
+
+
+# also works!
+cmd = 'python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 C:/Users/weedingb/Desktop/utas_solweig_run/DSM.tif'
