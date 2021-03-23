@@ -26,7 +26,8 @@ from qgis.core import QgsProject
 from qgis.core import QgsRasterLayer
 from qgis.core import QgsProcessingFeedback
 from qgis.analysis import QgsNativeAlgorithms
-
+import time
+import datetime
 
 # Initiating a QGIS application
 qgishome = 'C:/Program Files/QGIS 3.16/apps/qgis/'
@@ -311,11 +312,13 @@ os.system('python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A+B" --format GTif
 #%%
 # generation of sky view factors - slow!
 
+tick_svf_walls = time.perf_counter()
+
 processing.run("umep:Urban Geometry: Sky View Factor", 
     {'INPUT_DSM':home_folder+'/DSM_clipped_addDEM.tif',
     'USE_VEG':True,
     'TRANS_VEG':3,
-    'INPUT_CDSM':home_folder+'/CDSM_clipped_addDEM.tif',
+    'INPUT_CDSM':home_folder+'/CDSM_clipped.tif',
     'TSDM_EXIST':False,
     'INPUT_TDSM':None,
     'INPUT_THEIGHT':25,
@@ -330,9 +333,17 @@ processing.run("umep:Urban Geometry: Wall Height and Aspect",
     'INPUT_LIMIT':3,
     'OUTPUT_HEIGHT':home_folder+'/height.tif',
     'OUTPUT_ASPECT':home_folder+'/aspect.tif'})
+
+tock_svf_walls = time.perf_counter()
+
+runtime_svf_walls = str(datetime.timedelta(seconds=tock_svf_walls-tick_svf_walls))
+
+
     
 #%%
 # run SOLWEIG
+
+tick_solweig = time.perf_counter()
 
 processing.run("umep:Outdoor Thermal Comfort: SOLWEIG", 
                {'INPUT_DSM':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM_clipped_addDEM.tif',
@@ -377,12 +388,6 @@ processing.run("umep:Outdoor Thermal Comfort: SOLWEIG",
                 'OUTPUT_TREEPLANTER':False,
                 'OUTPUT_DIR':'C:\\Users\\weedingb\\Desktop\\utas_solweig_run\\solweig_output'})
 
+tock_solweig = time.perf_counter()
 
-    
-    
-    
-    
-    
-    
-    
-    
+runtime_solweig = str(datetime.timedelta(seconds=tock_solweig-tick_solweig))
