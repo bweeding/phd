@@ -44,7 +44,7 @@ QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
 # import third party processing plugins
 sys.path.append(r'C:\Users\weedingb\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins')
 
-from processing_umep.processing_umep_provider import ProcessingUMEPProvider
+from UMEP_processing_main.processing_umep_provider import ProcessingUMEPProvider
 umep_provider = ProcessingUMEPProvider()
 QgsApplication.processingRegistry().addProvider(umep_provider)
 # returns True
@@ -167,12 +167,7 @@ alg_params_dsm = {
 }
 DSM = processing.run('fusion:canopymodel', alg_params_dsm)   
 
-#processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.asc','TARGET_CRS':None,'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.tif'}) 
-
-# Works! assigns crs on generation of tif
 processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.asc','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.tif'})
-
-#os.system('python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 C:/Users/weedingb/Desktop/utas_solweig_run/DSM.tif')
 
 #%%
 
@@ -221,10 +216,6 @@ alg_params_cdsm = {
 CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)  
 
 processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.asc','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif'})
-
-
-#os.system('python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif')
-
 
 #%%
 
@@ -277,66 +268,12 @@ buildings_buffered_raster = processing.run('gdal:rasterize', alg_params_building
 #%% 
 
 
-# alg_params_cdsm_filt1 = {
-#     'INPUT_A':home_folder+'\\CDSM.tif',
-#     'BAND_A':1,
-#     'INPUT_B':home_folder+'\\buildings_buffered_raster.tif',
-#     'BAND_B':None,
-#     'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,
-#     'FORMULA':'A*B',
-#     'NO_DATA':None,
-#     'RTYPE':5,
-#     'OPTIONS':'',
-#     'EXTRA':'',
-#     'OUTPUT':home_folder+'\\CDSM_filt1.tif'}
-
-# cdsm_filt1 = processing.run("gdal:rastercalculator", alg_params_cdsm_filt1)
-
-# cdsm_layer = QgsRasterLayer(home_folder+'\\CDSM.tif')
-# cdsm_extent = cdsm_layer.extent()
-# cdsm_layer_loc = home_folder+'\\CDSM.tif'
-
-# buildings_layer = QgsRasterLayer(home_folder+'\\buildings_buffered_raster.tif')
-# buildings_layer_loc = home_folder+'\\buildings_buffered_raster.tif'
-
 os.system('python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A*B" --format GTiff --type Float32 -A C:/Users/weedingb/Desktop/utas_solweig_run/buildings_buffered_raster.tif --A_band 1 -B C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif --outfile C:/Users/weedingb/Desktop/utas_solweig_run/CDSM_filt1.tif'
 )
 
-# alg_params = {
-#      'CELLSIZE': 0,
-#      'CRS':QgsCoordinateReferenceSystem("EPSG:28355"),
-#      'EXPRESSION': f'{cdsm_layer_loc}@1*{buildings_layer_loc}@1',
-#      'EXTENT': cdsm_extent,
-#      'LAYERS': [cdsm_layer],
-#      'OUTPUT': home_folder+'\\raster_multiplied.tif'
-#  }
-
-# result = processing.run('qgis:rastercalculator', alg_params)
- 
-# processing.run("qgis:rastercalculator", 
-#                 {'EXPRESSION':'\"CDSM@1\" * \"buildings_buffered_raster@1\"',
-#                  'LAYERS':['C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif'],
-#                  'CELLSIZE':0,
-#                  'EXTENT':None,
-#                  'CRS':QgsCoordinateReferenceSystem('EPSG:28355'),
-#                  'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/rast_calc_output.tif'})
 
 #%%
 
-#layer3 = QgsRasterLayer(home_folder+'\\CDSM_filt1.tif','CDSM_filt1')
-
-# alg_params_cdsm_filt2 = {
-#     'INPUT_A':home_folder+'\\CDSM_filt1.tif',
-#     'BAND_A':1,
-#     'INPUT_B':None,'BAND_B':None,'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,
-#     'FORMULA':'(A>0.5)*A',
-#     'NO_DATA':None,
-#     'RTYPE':5,
-#     'OPTIONS':'',
-#     'EXTRA':'',
-#     'OUTPUT':home_folder+'\\CDSM_filt2.tif'}
-
-# processing.run("gdal:rastercalculator", alg_params_cdsm_filt2)
 
 os.system('python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "(A>0.5)*A" --format GTiff --type Float32 -A C:/Users/weedingb/Desktop/utas_solweig_run/CDSM_filt1.tif --A_band 1 --outfile C:/Users/weedingb/Desktop/utas_solweig_run/CDSM_filt2.tif'
 )
@@ -371,12 +308,6 @@ for file_in,file_out in zip(files_in,files_out):
 os.system('python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A+B" --format GTiff --type Float32 -A C:/Users/weedingb/Desktop/utas_solweig_run/DEM_clipped.tif --A_band 1 -B C:/Users/weedingb/Desktop/utas_solweig_run/DSM_clipped.tif --outfile C:/Users/weedingb/Desktop/utas_solweig_run/DSM_clipped_addDEM.tif'
 )
 
-#processing.run("gdal:rastercalculator", {'INPUT_A':home_folder+'/CDSM_clipped.tif','BAND_A':1,'INPUT_B':home_folder+'/DEM_clipped.tif','BAND_B':None,'INPUT_C':None,'BAND_C':None,'INPUT_D':None,'BAND_D':None,'INPUT_E':None,'BAND_E':None,'INPUT_F':None,'BAND_F':None,'FORMULA':'A+B','NO_DATA':None,'RTYPE':5,'OPTIONS':'','EXTRA':'','OUTPUT':home_folder+'/CDSM_clipped_addDEM.tif'})
-
-os.system('python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A+B" --format GTiff --type Float32 -A C:/Users/weedingb/Desktop/utas_solweig_run/CDSM_clipped.tif --A_band 1 -B C:/Users/weedingb/Desktop/utas_solweig_run/DEM_clipped.tif --outfile C:/Users/weedingb/Desktop/utas_solweig_run/CDSM_clipped_addDEM.tif'
-)
-
-
 #%%
 # generation of sky view factors - slow!
 
@@ -404,51 +335,48 @@ processing.run("umep:Urban Geometry: Wall Height and Aspect",
 # run SOLWEIG
 
 processing.run("umep:Outdoor Thermal Comfort: SOLWEIG", 
-    {'INPUT_DSM':home_folder+'/DSM_clipped_addDEM.tif',
-    'INPUT_SVF':home_folder+'\\svfs.zip',
-    'INPUT_HEIGHT':home_folder+'/height.tif',
-    'INPUT_ASPECT':home_folder+'/aspect.tif',
-    'USE_VEG':True,
-    'TRANS_VEG':3,
-    'INPUT_CDSM':home_folder+'/CDSM_clipped_addDEM.tif',
-    'TSDM_EXIST':False,
-    'INPUT_TDSM':None,
-    'INPUT_THEIGHT':25,
-    'USE_LC':False,
-    'INPUT_LC':None,
-    'USE_LC_BUILD':False,
-    'INPUT_DEM':home_folder+'/DEM_clipped_addDEM.tif',
-    'SAVE_BUILD':False,
-    'USE_ANISO':False,
-    'INPUT_ANISO':'',
-    'ALBEDO_WALLS':0.2,
-    'ALBEDO_GROUND':0.15,
-    'EMIS_WALLS':0.9,
-    'EMIS_GROUND':0.95,
-    'ABS_S':0.7,
-    'ABS_L':0.95,
-    'POSTURE':0,
-    'CYL':True,
-    'INPUTMET':home_folder+'\\metfile_20190105_20190106_tester.txt',
-    'ONLYGLOBAL':False,
-    'UTC':0,
-    'POI':False,
-    'POI_FILE':None,
-    'POI_FIELD':'',
-    'AGE':35,
-    'ACTIVITY':80,
-    'CLO':0.9,
-    'WEIGHT':75,
-    'HEIGHT':180,
-    'SEX':0,
-    'SENSOR_HEIGHT':10,
-    'OUTPUT_TMRT':True,
-    'OUTPUT_KDOWN':True,
-    'OUTPUT_KUP':False,
-    'OUTPUT_LDOWN':False,
-    'OUTPUT_LUP':False,
-    'OUTPUT_SH':False,
-    'OUTPUT_DIR':home_folder+'\\SOLWEIG_output'})
+               {'INPUT_DSM':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM_clipped_addDEM.tif',
+                'INPUT_SVF':'C:\\Users\\weedingb\\Desktop\\utas_solweig_run\\svfs.zip',
+                'INPUT_HEIGHT':'C:/Users/weedingb/Desktop/utas_solweig_run/height.tif',
+                'INPUT_ASPECT':'C:/Users/weedingb/Desktop/utas_solweig_run/aspect.tif',
+                'INPUT_CDSM':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM_clipped.tif',
+                'TRANS_VEG':3,
+                'INPUT_TDSM':None,
+                'INPUT_THEIGHT':25,
+                'INPUT_LC':None,
+                'USE_LC_BUILD':False,
+                'INPUT_DEM':'C:/Users/weedingb/Desktop/utas_solweig_run/DEM_clipped.tif',
+                'SAVE_BUILD':False,
+                'INPUT_ANISO':'',
+                'ALBEDO_WALLS':0.2,
+                'ALBEDO_GROUND':0.15,
+                'EMIS_WALLS':0.9,
+                'EMIS_GROUND':0.95,
+                'ABS_S':0.7,
+                'ABS_L':0.95,
+                'POSTURE':0,
+                'CYL':True,
+                'INPUTMET':'C:\\Users\\weedingb\\Desktop\\utas_solweig_run\\metfile_20190105_20190106_tester.txt',
+                'ONLYGLOBAL':False,
+                'UTC':0,
+                'POI_FILE':None,
+                'POI_FIELD':'',
+                'AGE':35,
+                'ACTIVITY':80,
+                'CLO':0.9,
+                'WEIGHT':75,
+                'HEIGHT':180,
+                'SEX':0,
+                'SENSOR_HEIGHT':10,
+                'OUTPUT_TMRT':True,
+                'OUTPUT_KDOWN':True,
+                'OUTPUT_KUP':False,
+                'OUTPUT_LDOWN':False,
+                'OUTPUT_LUP':False,
+                'OUTPUT_SH':True,
+                'OUTPUT_TREEPLANTER':False,
+                'OUTPUT_DIR':'C:\\Users\\weedingb\\Desktop\\utas_solweig_run\\solweig_output'})
+
 
     
     
