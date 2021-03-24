@@ -1,57 +1,39 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar 23 15:17:16 2021
 
-@author: weedingb
-"""
+#%% Import and setup of PyQGIS environment
 
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Mar 12 12:37:31 2021
-
-@author: weedingb
-"""
-#%% inputs to add
-#home_folder
-
-
-#%% debug from here
-
+# import packages
 import sys
 import os
-from qgis import processing
-from qgis.core import QgsApplication
-from qgis.core import QgsCoordinateReferenceSystem
-from qgis.core import QgsProject
-from qgis.core import QgsRasterLayer
-from qgis.core import QgsProcessingFeedback
-from qgis.analysis import QgsNativeAlgorithms
 import time
 import datetime
+from qgis import processing
+from qgis.core import QgsApplication, QgsProject, QgsCoordinateReferenceSystem
+from qgis.analysis import QgsNativeAlgorithms
 
-# Initiating a QGIS application
+
+# initiate a PyQGIS application
 qgishome = 'C:/Program Files/QGIS 3.16/apps/qgis/'
 QgsApplication.setPrefixPath(qgishome, True)
 app = QgsApplication([], False)
 app.initQgis()
 
+# set the coordinate reference system of the project
 QgsProject.instance().setCrs(QgsCoordinateReferenceSystem('EPSG:28355'))
 
-#import processing
+# import and activate the QGIS native processing algorithms
 from processing.core.Processing import Processing
 Processing.initialize()
 QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
 
-# import third party processing plugins
+# add the folder containing 3rd party processing algorithm to the path
 sys.path.append(r'C:\Users\weedingb\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins')
 
+# import UMEP processing tools
 from UMEP_processing_main.processing_umep_provider import ProcessingUMEPProvider
 umep_provider = ProcessingUMEPProvider()
 QgsApplication.processingRegistry().addProvider(umep_provider)
-# returns True
 
-
-# works!
+# import Fusion processing tools
 from processing_fusion.fusionProvider import FusionProvider
 fusion_provider = FusionProvider()
 QgsApplication.processingRegistry().addProvider(fusion_provider)
@@ -59,28 +41,15 @@ QgsApplication.processingRegistry().addProvider(fusion_provider)
 # sets home folder location
 home_folder = 'C:\\Users\\weedingb\\Desktop\\utas_solweig_run'
 
+# sets the LAS (lidar) path and filename
 las_loc = home_folder+'\\MtWellington2011-C2-AHD_5265249_55_classified.las'
 
+# sets the building shape file path and filename
 build_loc = home_folder+'\\list_2d_building_polys_hobart.shp'
 
-for alg in QgsApplication.processingRegistry().algorithms():
-    print("{}:{} --> {}".format(alg.provider().name(), alg.name(), alg.displayName()))
-
-################################################################################
-# Do this later, polyclipdata won't run if the shape file is loaded!?!?
-
-# loads the building shape file
-#building_layer = QgsVectorLayer(home_folder+'\\list_2d_building_polys_hobart.shp', 'buildings', 'ogr')
-
-# adds the building shapefile as a layer
-#QgsProject.instance().addMapLayer(building_layer)
-
-################################################################################
-
-# specifies the location of the current las file and buildings file
-# should it just auto select a .las file? How will we structure? 
-# depends on run time!
-
+# lists all available processing algorithms, commented out by default
+# for alg in QgsApplication.processingRegistry().algorithms():
+#     print("{}:{} --> {}".format(alg.provider().name(), alg.name(), alg.displayName()))
 
 #%%
 # creates a DEM (grid surface create class 2)
