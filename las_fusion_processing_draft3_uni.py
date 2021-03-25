@@ -51,8 +51,9 @@ build_loc = home_folder+'\\list_2d_building_polys_hobart.shp'
 # for alg in QgsApplication.processingRegistry().algorithms():
 #     print("{}:{} --> {}".format(alg.provider().name(), alg.name(), alg.displayName()))
 
-#%%
-# creates a DEM (grid surface create class 2)
+#%% Digital elevation model production
+
+# creates a DEM using fusion:gridsurfacecreate in .dtm format
 alg_params_DEM = {
     'ADVANCED_MODIFIERS': '',
     'CELLSIZE': 1,
@@ -71,13 +72,15 @@ alg_params_DEM = {
     
 dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 
+# converts the .dtm to .tif using fusion:dtm2tif
 processing.run("fusion:dtm2tif", {'INPUT':home_folder+'/DEM.dtm','MASK':False,'OUTPUT':home_folder+'/DEM.tif'})
 
+# assigns a CRS to the .tif file via the command line
 os.system('python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 C:/Users/weedingb/Desktop/utas_solweig_run/DEM.tif')
-#%%
-# Process the las files
 
-# ground_outside_b.las
+#%% Classifcation of LAS file/LIDAR data
+
+# classifies and clips ground points outside buildings using fusion:pollyclipdata
 alg_params_ground_outside_b = {
     'ADVANCED_MODIFIERS': '/outside /class:2',
     'FIELD': '',
@@ -91,7 +94,7 @@ alg_params_ground_outside_b = {
 ground_outside_b = processing.run('fusion:pollyclipdata',alg_params_ground_outside_b)
     
     
-# veg_outside_b.las
+# classifies and clips vegetation points outside buildings using fusion:pollyclipdata
 alg_params_veg_outside_b = {
     'ADVANCED_MODIFIERS': '/outside /class:3,4,5',
     'FIELD': '',
@@ -104,7 +107,7 @@ alg_params_veg_outside_b = {
 }
 veg_outside_b = processing.run('fusion:pollyclipdata', alg_params_veg_outside_b)    
     
-# buildings_inside_b.las
+# classifies and clips building points inside buildings using fusion:pollyclipdata
 alg_params_buildings_inside_b = {
     'ADVANCED_MODIFIERS': '/class:6',
     'FIELD': '',
@@ -117,9 +120,9 @@ alg_params_buildings_inside_b = {
 }
 buildings_inside_b = processing.run('fusion:pollyclipdata', alg_params_buildings_inside_b)   
 
-#%%
+#%% Digital surface model production
 
-# DSM - ground isn't working!
+# creates a DSM using fusion:canopymodel in .asc format
 alg_params_dsm = {
     'ADVANCED_MODIFIERS': '',
     'ASCII': True,
@@ -137,6 +140,7 @@ alg_params_dsm = {
 }
 DSM = processing.run('fusion:canopymodel', alg_params_dsm)   
 
+# sets the CRS of the .asc file to EPSG:28355
 processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.asc','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.tif'})
 
 #%%
