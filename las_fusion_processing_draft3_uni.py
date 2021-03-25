@@ -128,7 +128,7 @@ alg_params_dsm = {
     'ASCII': True,
     'CELLSIZE': 1,
     'CLASS': '',
-    'GROUND': home_folder+'\\DEM.dtm',
+    'GROUND': '',#home_folder+'\\DEM.dtm',
     'INPUT': home_folder+'\\ground_outside_b.las'+';'+home_folder+'\\buildings_inside_b.las',
     'MEDIAN': '',
     'SLOPE': False,
@@ -155,7 +155,7 @@ extent = processing.run('native:polygonfromlayerextent',alg_params_extent)
 
 # classifies and clips vegetation points outside buildings 2.5m above the DEM using fusion:clipdata
 alg_params_veg_outside_b_zmin2_5 = {
-    'ADVANCED_MODIFIERS': '/zmin:2.5',
+    'ADVANCED_MODIFIERS':'', #'/zmin:1.5',
     'CLASS': '',
     'DTM': home_folder+'\\DEM.dtm',
     'EXTENT': home_folder+'\\DSM_extent.shp',
