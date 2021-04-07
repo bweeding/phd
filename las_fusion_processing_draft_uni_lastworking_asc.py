@@ -45,13 +45,7 @@ base_folder = 'C:\\Users\\weedingb\\Desktop\\utas_solweig_run\\'
 os.mkdir(base_folder+'SOLWEIG_run_'+datetime.datetime.now().strftime('%d-%m-%Y_%H%M'))
 
 # sets run folder location
-run_folder = base_folder+'SOLWEIG_run_'+datetime.datetime.now().strftime('%d-%m-%Y_%H%M')+'\\'
-
-# creates output folder
-os.mkdir(run_folder+'SOLWEIG_output'+datetime.datetime.now().strftime('%d-%m-%Y_%H%M'))
-
-# sets output folder location
-output_folder = run_folder+'SOLWEIG_output'+datetime.datetime.now().strftime('%d-%m-%Y_%H%M')
+run_folder = base_folder+'SOLWEIG_run_'+datetime.datetime.now().strftime('%d-%m-%Y_%H%M')
 
 # sets the LAS (lidar) path and filename
 las_loc = base_folder+'MtWellington2011-C2-AHD_5265249_55_classified.las'
@@ -87,10 +81,8 @@ dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 # converts the .dtm to .tif using fusion:dtm2tif
 processing.run("fusion:dtm2tif", {'INPUT':run_folder+'DEM.dtm','MASK':False,'OUTPUT':run_folder+'DEM.tif'})
 
-str_in_assignCRS = 'python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 '+run_folder+'DEM.tif'
-
 # assigns a CRS to the .tif file via the command line
-os.system(str_in_assignCRS)
+os.system('python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 C:/Users/weedingb/Desktop/utas_solweig_run/DEM.tif')
 
 #%% Classifcation of LAS file/LIDAR data
 
@@ -136,97 +128,73 @@ buildings_inside_b = processing.run('fusion:pollyclipdata', alg_params_buildings
 
 #%% Digital surface model production
 
-# creates a DSM using fusion:canopymodel in .dtm format
+# creates a DSM using fusion:canopymodel in .asc format
 alg_params_dsm = {
     'ADVANCED_MODIFIERS': '',
     'ASCII': True,
     'CELLSIZE': 1,
     'CLASS': '',
-    'GROUND': '',#run_folder+'DEM.dtm', don't use ground.dtm according to FL
-    'INPUT': run_folder+'ground_outside_b.las'+';'+run_folder+'buildings_inside_b.las',
+    'GROUND': run_folder+'\\DEM.dtm',
+    'INPUT': run_folder+'\\ground_outside_b.las'+';'+run_folder+'\\buildings_inside_b.las',
     'MEDIAN': '',
     'SLOPE': False,
     'SMOOTH': '',
     'VERSION64': True,
     'XYUNITS': 0,
     'ZUNITS': 0,
-    'OUTPUT': run_folder+'DSM.dtm'
+    'OUTPUT': run_folder+'\\DSM.asc'
 }
-DSM = processing.run('fusion:canopymodel', alg_params_dsm)
+DSM = processing.run('fusion:canopymodel', alg_params_dsm)   
 
-# converts the .dtm to .tif using fusion:dtm2tif
-#processing.run("fusion:dtm2tif", {'INPUT':run_folder+'DSM.dtm','MASK':False,'OUTPUT':run_folder+'DSM_dummy.tif'})
-processing.run("fusion:dtm2tif", {'INPUT':run_folder+'DSM.dtm','MASK':False,'OUTPUT':run_folder+'DSM.tif'})
-      
+# sets the CRS of the .asc file to EPSG:28355
+processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.asc','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/DSM.tif'})
 
-# sets the CRS of the .tif file to EPSG:28355
-#processing.run("gdal:translate", {'INPUT':run_folder+'DSM_dummy.tif','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':run_folder+'DSM.tif'})
-
-str_in_assignCRS = 'python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 '+run_folder+'DSM.tif'
-
-# assigns a CRS to the .tif file via the command line
-os.system(str_in_assignCRS)
+#%% Canopy digiital surface model production
 
 # converts extent of the DSM to a shapefile using native:polygonfromlayerextent
 alg_params_extent = {
-    'INPUT':run_folder+'DSM.tif',
-    'OUTPUT':run_folder+'DSM_extent.shp'
+    'INPUT':run_folder+'\\DSM.asc',
+    'OUTPUT':run_folder+'\\DSM_extent.shp'
 }
 
 extent = processing.run('native:polygonfromlayerextent',alg_params_extent)
 
-#%% Canopy digiital surface model production
-
-
 # classifies and clips vegetation points outside buildings 2.5m above the DEM using fusion:clipdata
 alg_params_veg_outside_b_zmin2_5 = {
-    'ADVANCED_MODIFIERS':'/zmin:2.5',
+    'ADVANCED_MODIFIERS': '/zmin:2.5',
     'CLASS': '',
-    'DTM':'',# run_folder+'DEM.dtm',
-    'EXTENT': run_folder+'DSM_extent.shp',
+    'DTM': run_folder+'\\DEM.dtm',
+    'EXTENT': run_folder+'\\DSM_extent.shp',
     'HEIGHT': False,
     'IGNOREOVERLAP': False,
-    'INPUT': run_folder+'veg_outside_b.las',
+    'INPUT': run_folder+'\\veg_outside_b.las',
     'SHAPE': 0,
     'VERSION64': True,
-    'OUTPUT': run_folder+'veg_outside_b_zmin2_5.las'
+    'OUTPUT': run_folder+'\\veg_outside_b_zmin2_5.las'
 }
 veg_outside_b_zmin2_5 = processing.run('fusion:clipdata', alg_params_veg_outside_b_zmin2_5)
 
-# creates a CDSM.dtm using fusion:canopy model
+# creates a CDSM.asc using fusion:canopy model
 alg_params_cdsm = {
     'ADVANCED_MODIFIERS': '',
     'ASCII': True,
     'CELLSIZE': 1,
     'CLASS': '',
-    'GROUND':'',#run_folder+'DEM.dtm',
-    'INPUT': run_folder+'ground_outside_b.las'+';'+run_folder+'\\veg_outside_b_zmin2_5.las',
+    'GROUND': run_folder+'\\DEM.dtm',
+    'INPUT': run_folder+'\\ground_outside_b.las'+';'+run_folder+'\\veg_outside_b_zmin2_5.las',
     'MEDIAN': '',
     'SLOPE': False,
     'SMOOTH': '',
     'VERSION64': True,
     'XYUNITS': 0,
     'ZUNITS': 0,
-    'OUTPUT': run_folder+'CDSM.dtm'
+    'OUTPUT': run_folder+'\\CDSM.asc'
 }
 
 CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)  
 
-# converts the .dtm to .tif using fusion:dtm2tif
-processing.run("fusion:dtm2tif", {'INPUT':run_folder+'CDSM.dtm','MASK':False,'OUTPUT':run_folder+'CDSM.tif'})
-   
-str_in_assignCRS = 'python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 '+run_folder+'CDSM.tif'
-
-# assigns a CRS to the .tif file via the command line
-os.system(str_in_assignCRS)
-
-
-# sets the CRS of the .tif file to EPSG:28355
-#processing.run("gdal:translate", {'INPUT':run_folder+'CDSM_dummy.tif','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':run_folder+'CDSM.tif'})
-
-
 # creates a CDSM.tif with CRS EPSG:28355
-# processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.asc','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif'})
+processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.asc','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif'})
 
 #%% Buffered building raster production
 
@@ -239,7 +207,7 @@ alg_params_buildings_buffered = {
     'JOIN_STYLE': 1,
     'MITER_LIMIT': 2,
     'SEGMENTS': 5,
-    'OUTPUT': run_folder+'buildings_buffered.shp'
+    'OUTPUT': run_folder+'\\buildings_buffered.shp'
 }
 buildings_buffered = processing.run('native:buffer', alg_params_buildings_buffered)
 
@@ -251,8 +219,8 @@ alg_params_buildings_buffered_zeros = {
     'FIELD_TYPE': 1,
     'FORMULA': 'value = 0',
     'GLOBAL': '',
-    'INPUT': run_folder+'buildings_buffered.shp',
-    'OUTPUT': run_folder+'buildings_buffered_zeros.shp'
+    'INPUT': run_folder+'\\buildings_buffered.shp',
+    'OUTPUT': run_folder+'\\buildings_buffered_zeros.shp'
 }
 buildings_buffered_zeros = processing.run('qgis:advancedpythonfieldcalculator', alg_params_buildings_buffered_zeros)
 
@@ -260,38 +228,32 @@ buildings_buffered_zeros = processing.run('qgis:advancedpythonfieldcalculator', 
 alg_params_buildings_buffered_raster = {
     'BURN': '',
     'DATA_TYPE': 5,
-    'EXTENT': run_folder+'DSM_extent.shp',
+    'EXTENT': run_folder+'\\DSM_extent.shp',
     'EXTRA': '',
     'FIELD': 'zeros',
     'HEIGHT': 1,
     'INIT': 1,
-    'INPUT': run_folder+'buildings_buffered_zeros.shp',
+    'INPUT': run_folder+'\\buildings_buffered_zeros.shp',
     'INVERT': False,
     'NODATA': None,
     'OPTIONS': '',
     'UNITS': 1,
     'WIDTH': 1,
-    'OUTPUT': run_folder+'buildings_buffered_raster.tif'
+    'OUTPUT': run_folder+'\\buildings_buffered_raster.tif'
 }
 buildings_buffered_raster = processing.run('gdal:rasterize', alg_params_buildings_buffered_raster)
 
 
 #%% Filtered CDSM production
 
-# prepare system string
-str_in_AtimesB = 'python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A*B" --format GTiff --type Float32 -A '+run_folder+'buildings_buffered_raster.tif --A_band 1 -B '+run_folder+'CDSM.tif --outfile '+run_folder+'CDSM_filt1.tif'
-
 # multiply the buffered building raster with the CDSM using the command line, removing any vegetation present inside the buffered buildings
-os.system(str_in_AtimesB)
-
-# prepare system string
-str_in_AtimesA = 'python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "(A>0.5)*A" --format GTiff --type Float32 -A '+run_folder+'CDSM_filt1.tif --A_band 1 --outfile '+run_folder+'CDSM_filt2.tif'
-
+os.system('python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A*B" --format GTiff --type Float32 -A C:/Users/weedingb/Desktop/utas_solweig_run/buildings_buffered_raster.tif --A_band 1 -B C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif --outfile C:/Users/weedingb/Desktop/utas_solweig_run/CDSM_filt1.tif'
+)
 # eliminates small fluctuating elevations produced by the canopy model algorithm when normalised against the DEM.dtm
-os.system(str_in_AtimesA)
-
+os.system('python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "(A>0.5)*A" --format GTiff --type Float32 -A C:/Users/weedingb/Desktop/utas_solweig_run/CDSM_filt1.tif --A_band 1 --outfile C:/Users/weedingb/Desktop/utas_solweig_run/CDSM_filt2.tif'
+)
 # assigns a projection to the filtered CDSM of EPSG:28355 using gdal:assignprojection
-processing.run("gdal:assignprojection", {'INPUT':run_folder+'CDSM_filt2.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
+processing.run("gdal:assignprojection", {'INPUT':run_folder+'/CDSM_filt2.tif','CRS':'QgsCoordinateReferenceSystem("EPSG:28355")'})
 
 
 #%% Clip raster extents for speed on laptop
@@ -316,22 +278,9 @@ for file_in,file_out in zip(files_in,files_out):
         'EXTRA':'',
         'OUTPUT':file_out})
 
-
-str_in_DSM_addDEM = 'python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A+B" --format GTiff --type Float32 -A '+run_folder+'DEM_clipped.tif --A_band 1 -B '+run_folder+'DSM_clipped.tif --outfile '+run_folder+'DSM_clipped_addDEM.tif'
-
 # adds the clipped DEM to the clipped DSM    
-os.system(str_in_DSM_addDEM)
-
-processing.run("gdal:assignprojection", {'INPUT':run_folder+'DSM_clipped_addDEM.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
-
-
-str_in_CDSM_addDEM = 'python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A+B" --format GTiff --type Float32 -A '+run_folder+'DEM_clipped.tif --A_band 1 -B '+run_folder+'CDSM_clipped.tif --outfile '+run_folder+'CDSM_clipped_addDEM.tif'
-
-os.system(str_in_CDSM_addDEM)
-
-processing.run("gdal:assignprojection", {'INPUT':run_folder+'CDSM_clipped_addDEM.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
-
-
+os.system('python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A+B" --format GTiff --type Float32 -A C:/Users/weedingb/Desktop/utas_solweig_run/DEM_clipped.tif --A_band 1 -B C:/Users/weedingb/Desktop/utas_solweig_run/DSM_clipped.tif --outfile C:/Users/weedingb/Desktop/utas_solweig_run/DSM_clipped_addDEM.tif'
+)
 
 #%% Sky view factor and wall data production
 
@@ -368,8 +317,6 @@ runtime_svf_walls = str(datetime.timedelta(seconds=tock_svf_walls-tick_svf_walls
     
 #%% SOLWEIG
 
-
-
 # initial time
 tick_solweig = time.perf_counter()
 
@@ -379,7 +326,7 @@ processing.run("umep:Outdoor Thermal Comfort: SOLWEIG",
                 'INPUT_SVF':run_folder+'svfs.zip',
                 'INPUT_HEIGHT':run_folder+'height.tif',
                 'INPUT_ASPECT':run_folder+'aspect.tif',
-                'INPUT_CDSM':run_folder+'CDSM_clipped.tif',  
+                'INPUT_CDSM':run_folder+'CDSM_clipped.tif',
                 'TRANS_VEG':3,
                 'INPUT_TDSM':None,
                 'INPUT_THEIGHT':25,
@@ -396,7 +343,7 @@ processing.run("umep:Outdoor Thermal Comfort: SOLWEIG",
                 'ABS_L':0.95,
                 'POSTURE':0,
                 'CYL':True,
-                'INPUTMET':base_folder+'metfile_20190105_20190106_tester.txt',
+                'INPUTMET':run_folder+'metfile_20190105_20190106_tester.txt',
                 'ONLYGLOBAL':False,
                 'UTC':0,
                 'POI_FILE':None,
@@ -415,7 +362,7 @@ processing.run("umep:Outdoor Thermal Comfort: SOLWEIG",
                 'OUTPUT_LUP':False,
                 'OUTPUT_SH':True,
                 'OUTPUT_TREEPLANTER':False,
-                'OUTPUT_DIR':output_folder})
+                'OUTPUT_DIR':run_folder+'solweig_output'})
 
 # finish time
 tock_solweig = time.perf_counter()
@@ -424,5 +371,4 @@ tock_solweig = time.perf_counter()
 runtime_solweig = str(datetime.timedelta(seconds=tock_solweig-tick_solweig))
 
 
-print(runtime_svf_walls)
-print(runtime_solweig)
+
