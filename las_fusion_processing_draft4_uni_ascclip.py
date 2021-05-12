@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Apr  9 13:09:16 2021
+
+@author: weedingb
+"""
+
+
 #%% Import and setup of PyQGIS environment
 
 # import packages
@@ -29,7 +37,7 @@ QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
 sys.path.append(r'C:\Users\weedingb\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins')
 
 # import UMEP processing tools
-from processing_umep.processing_umep_provider import ProcessingUMEPProvider
+from UMEP_processing_main.processing_umep_provider import ProcessingUMEPProvider
 umep_provider = ProcessingUMEPProvider()
 QgsApplication.processingRegistry().addProvider(umep_provider)
 
@@ -86,19 +94,6 @@ dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 
 # converts the .dtm to .tif using fusion:dtm2tif
 processing.run("fusion:dtm2tif", {'INPUT':run_folder+'DEM.dtm','MASK':False,'OUTPUT':run_folder+'DEM.tif'})
-
-# processing.run("LAStools:las2dem", 
-#                {'VERBOSE':False,
-#                 'CPU64':False,
-#                 'GUI':False,
-#                 'INPUT_LASLAZ':'C:\\Users\\weedingb\\Desktop\\utas_solweig_run\\MtWellington2011-C2-AHD_5265249_55_classified.las',
-#                 'FILTER_RETURN_CLASS_FLAGS1':7,
-#                 'STEP':1,
-#                 'ATTRIBUTE':0,
-#                 'PRODUCT':0,
-#                 'USE_TILE_BB':False,
-#                 'OUTPUT_RASTER':'C:/Users/weedingb/Desktop/utas_solweig_run/las2demtest2.tif',
-#                 'ADDITIONAL_OPTIONS':''})
 
 str_in_assignCRS = 'python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 '+run_folder+'DEM.tif'
 
@@ -228,7 +223,7 @@ alg_params_cdsm = {
 
 CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)  
 
-
+#ASC file is correct!!!!
 # why the difference between dtm to tif and dtm to asc? check umep guide for sequence
 # 
 ds=gdal.Open(run_folder+'CDSM.asc')
@@ -309,7 +304,7 @@ buildings_buffered_raster = processing.run('gdal:rasterize', alg_params_building
 # CDSM is 1001x1001, building file is 1001x1003 - clip earlier??
 
 # prepare system string
-str_in_AtimesB = 'python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A*B" --format GTiff --type Float32 -A '+run_folder+'buildings_buffered_raster.tif --A_band 1 -B '+run_folder+'CDSM.asc --outfile '+run_folder+'CDSM_filt1.tif'
+str_in_AtimesB = 'python %CONDA_PREFIX%\Scripts\gdal_calc.py --calc "A*B" --format GTiff --type Float32 -A '+run_folder+'buildings_buffered_raster.tif --A_band 1 -B '+run_folder+'CDSM.tif --outfile '+run_folder+'CDSM_filt1.tif'
 
 # multiply the buffered building raster with the CDSM using the command line, removing any vegetation present inside the buffered buildings
 os.system(str_in_AtimesB)
@@ -339,7 +334,7 @@ for file_in,file_out in zip(files_in,files_out):
 
     processing.run("gdal:cliprasterbyextent", 
         {'INPUT':file_in,
-        'PROJWIN':'526707.4469,526794.8455,5249811.8763,5249894.1338 [EPSG:28355]',
+        'PROJWIN':'526570.7875,526739.3125,5249794.0250,5249935.7750 [EPSG:28355]',
         'NODATA':None,
         'OPTIONS':'',
         'DATA_TYPE':0,
