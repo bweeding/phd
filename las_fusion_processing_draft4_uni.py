@@ -85,29 +85,9 @@ alg_params_DEM = {
 dem = processing.run('fusion:gridsurfacecreate', alg_params_DEM)
 
 # converts the .dtm to .tif using fusion:dtm2tif
-processing.run("fusion:dtm2tif", {'INPUT':run_folder+'DEM.dtm','MASK':False,'OUTPUT':run_folder+'DEM.tif'})
-
-# processing.run("LAStools:las2dem", 
-#                {'VERBOSE':False,
-#                 'CPU64':False,
-#                 'GUI':False,
-#                 'INPUT_LASLAZ':'C:\\Users\\weedingb\\Desktop\\utas_solweig_run\\MtWellington2011-C2-AHD_5265249_55_classified.las',
-#                 'FILTER_RETURN_CLASS_FLAGS1':7,
-#                 'STEP':1,
-#                 'ATTRIBUTE':0,
-#                 'PRODUCT':0,
-#                 'USE_TILE_BB':False,
-#                 'OUTPUT_RASTER':'C:/Users/weedingb/Desktop/utas_solweig_run/las2demtest2.tif',
-#                 'ADDITIONAL_OPTIONS':''})
-
-processing.run("gdal:warpreproject", {'INPUT':run_folder+'DEM.tif','SOURCE_CRS':None,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'RESAMPLING':0,'NODATA':None,'TARGET_RESOLUTION':None,'OPTIONS':'','DATA_TYPE':0,'TARGET_EXTENT':None,'TARGET_EXTENT_CRS':None,'MULTITHREADING':False,'EXTRA':'','OUTPUT':run_folder+'DEM_repro.tif'})
-
-#processing.run("gdal:assignprojection", {'INPUT':'C:\\Users\\weedingb\\Desktop\\utas_solweig_run\\SOLWEIG_run_12-05-2021_1531\\DEM.tif','CRS':QgsCoordinateReferenceSystem('EPSG:28355')})
-
-# str_in_assignCRS = 'python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 '+run_folder+'DEM.tif'
-
-# # assigns a CRS to the .tif file via the command line
-# os.system(str_in_assignCRS)
+processing.run("fusion:dtm2tif", {'INPUT':run_folder+'DEM.dtm','MASK':False,'OUTPUT':run_folder+'DEM_nopro.tif'})
+# modify resampling to alter banding artifacts? 1?
+processing.run("gdal:warpreproject", {'INPUT':run_folder+'DEM_nopro.tif','SOURCE_CRS':None,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'RESAMPLING':0,'NODATA':None,'TARGET_RESOLUTION':None,'OPTIONS':'','DATA_TYPE':0,'TARGET_EXTENT':None,'TARGET_EXTENT_CRS':None,'MULTITHREADING':False,'EXTRA':'','OUTPUT':run_folder+'DEM.tif'})
 
 #%% Classifcation of LAS file/LIDAR data
 
@@ -172,18 +152,10 @@ alg_params_dsm = {
 DSM = processing.run('fusion:canopymodel', alg_params_dsm)
 
 # converts the .dtm to .tif using fusion:dtm2tif
-processing.run("fusion:dtm2tif", {'INPUT':run_folder+'DSM.dtm','MASK':False,'OUTPUT':run_folder+'DSM.tif'})
+processing.run("fusion:dtm2tif", {'INPUT':run_folder+'DSM.dtm','MASK':False,'OUTPUT':run_folder+'DSM_nopro.tif'})
 #processing.run("fusion:dtm2tif", {'INPUT':run_folder+'DSM.dtm','MASK':False,'OUTPUT':run_folder+'DSM_dummy.tif'})
 
-      
-
-# sets the CRS of the .tif file to EPSG:28355
-#processing.run("gdal:translate", {'INPUT':run_folder+'DSM_dummy.tif','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':run_folder+'DSM.tif'})
-
-str_in_assignCRS = 'python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 '+run_folder+'DSM.tif'
-
-# assigns a CRS to the .tif file via the command line
-os.system(str_in_assignCRS)
+processing.run("gdal:warpreproject", {'INPUT':run_folder+'DSM_nopro.tif','SOURCE_CRS':None,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'RESAMPLING':0,'NODATA':None,'TARGET_RESOLUTION':None,'OPTIONS':'','DATA_TYPE':0,'TARGET_EXTENT':None,'TARGET_EXTENT_CRS':None,'MULTITHREADING':False,'EXTRA':'','OUTPUT':run_folder+'DSM.tif'})
 
 # converts extent of the DSM to a shapefile using native:polygonfromlayerextent
 alg_params_extent = {
@@ -236,23 +208,9 @@ CDSM = processing.run('fusion:canopymodel', alg_params_cdsm)
 # why the difference between dtm to tif and dtm to asc? check umep guide for sequence
 # 
 ds=gdal.Open(run_folder+'CDSM.asc')
-ds2=gdal.Translate(run_folder+'CDSM.tif',ds)
+ds2=gdal.Translate(run_folder+'CDSM_nopro.tif',ds)
 
-# converts the .dtm to .tif using fusion:dtm2tif
-#processing.run("fusion:dtm2tif", {'INPUT':run_folder+'CDSM.dtm','MASK':False,'OUTPUT':run_folder+'CDSM.tif'})
-   
-str_in_assignCRS = 'python %CONDA_PREFIX%\Scripts\gdal_edit.py -a_srs EPSG:28355 '+run_folder+'CDSM.tif'
-
-# assigns a CRS to the .tif file via the command line
-os.system(str_in_assignCRS)
-
-
-# sets the CRS of the .tif file to EPSG:28355
-#processing.run("gdal:translate", {'INPUT':run_folder+'CDSM_dummy.tif','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':run_folder+'CDSM.tif'})
-
-
-# creates a CDSM.tif with CRS EPSG:28355
-# processing.run("gdal:translate", {'INPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.asc','TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'NODATA':None,'COPY_SUBDATASETS':False,'OPTIONS':'','EXTRA':'','DATA_TYPE':0,'OUTPUT':'C:/Users/weedingb/Desktop/utas_solweig_run/CDSM.tif'})
+processing.run("gdal:warpreproject", {'INPUT':run_folder+'CDSM_nopro.tif','SOURCE_CRS':None,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:28355'),'RESAMPLING':0,'NODATA':None,'TARGET_RESOLUTION':None,'OPTIONS':'','DATA_TYPE':0,'TARGET_EXTENT':None,'TARGET_EXTENT_CRS':None,'MULTITHREADING':False,'EXTRA':'','OUTPUT':run_folder+'CDSM.tif'})
 
 #%% Buffered building raster production
 

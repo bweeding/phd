@@ -1,8 +1,8 @@
-.. _ProcessingSEBE:
 
+======================================================
 SOLWEIG in a standalone environment
 ======================================================
-Ben Weeding and Dr Peter Love, 2021
+*Ben Weeding and Dr Peter Love (2021)*
 
 .. note:: Completing tutorials for `Spatial data <https://umep-docs.readthedocs.io/projects/tutorial/en/latest/Tutorials/LidarProcessing.html/>`_ ,
  `SOLWEIG <https://umep-docs.readthedocs.io/projects/tutorial/en/latest/Tutorials/IntroductionToSolweig.html/>`_,
@@ -12,47 +12,26 @@ Ben Weeding and Dr Peter Love, 2021
 Introduction
 ------------
 
-**UMEP for Processing** ports many of the UMEP tools to the `QGIS processing framework <https://docs.qgis.org/3.10/en/docs/user_manual/processing/intro.html>`__, which is a geoprocessing environment that can be used to call native and third-party algorithms from QGIS, making your spatial analysis tasks more productive and easy to accomplish. You can, for example, call the UMEP tools directly as functions in a Python script or include them in the `Graphical Modeler <https://docs.qgis.org/3.10/en/docs/user_manual/processing/modeler.html?highlight=graphical>`__ in QGIS.
+This tutorial outlines a SOLWEIG workflow beginning with LIDAR spatial data (in .las format),
+a vector file of building footprints (in .shp), and a meteorological record in the specified UMEP format.
 
-Many of the analysis carried out in UMEP has to be set up as a workflow where one or many tools has to be executed in sequence in order to reach a final result. In this tutorial we will make use of the example of the model *Solar Energy on Building Envelopes* (SEBE) which can be used to estimate incoming solar radiation on roofs, walls and ground in urban environments. The figure below shows the workflow that needs to be considered to reach the final result.
-
-.. figure:: /images/SEBE_flowchart.jpg
-   :width: 100%
-   :align: center
-   :alt:  None
-
-   Workflow and geodata used for analysing solar irradiance on building envelopes using the SEBE model. Bold outlines are mandatory items. Yellow, orange and red indicates pre-processor, processor and post-processor tools in UMEP, respectively. Grey boxes indicate geodatasets.
-
-In this tutorial you will only make use of the mandatory steps (bold outlines).
-
-Steps
-~~~~~
-
-#. To explore how UMEP can be used within the Processing Toolbox in QGIS
-#. Create a workflow model for solar radiation modelling in UMEP
-#. Explore the possibilities of using Python for UMEP and QGIS 
-
-
-Installing UMEP for Processing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Installing a processing plugin is done in same way as any other plugin in QGIS:
-
-* UMEP for processing (Experimental and not complete) is available from *Plugins -> Manage and Install Plugins...* in the menu bar in QGIS. Remember to tick in **show also experimental plugins** under the **Settings**-tab. 
-* Under the *All*-tab, search for **UMEP for processing**, click on it and then **Install Plugin**. 
-
-If installed succesfully, You will now see **UMEP** in the *Processing Toolbox*-panel to the right in QGIS.
-
+The workflow runs in an independent Python environment managed using Anaconda, with separate steps for Windows or Linux systems.
+The workflows have only been tested in the specified environments/systems, and function outside of these is unknown.
+ 
 
 Data for this Tutorial
 ~~~~~~~~~~~~~~~~~~~~~~
 
-You will make use of the same dataset used in the tutorial :ref:`SEBE`. The geodata covers a small area in central **Gothenburg, Sweden**. Data are projected in SWEREF99 1200 (EPSG:3007) which is the Swedish national coordinate system.
+las data from the list
+sample met data - take from other tutorials on umep website!
 
-:download:`Datasets for Gothenburg, Sweden </data/Goteborg_SWEREF99_1200.zip>`
-
-UMEP for processing: First example 
+Windows
 ----------------------------------
+Tested on Windows 10 - add more detail?
+
+Environment
+~~~~~~~~~~~~~~~~~~~~~~
+Create a .yml document to launch an environment from?
 
 The tools in **UMEP for processing** are the same as in **UMEP** found in the menubar. However, it is not as complete, as some tools are not suitable to be used within the processing framework in QGIS. As a first example you will explore the *Wall Height* and *Aspect tool*.
 
