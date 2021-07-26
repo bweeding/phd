@@ -12,9 +12,21 @@ import matplotlib.pyplot as plt
 import os
 import glob
 
+# can use landcover map buildings=2 to eliminate building value
 
+# raster multiply by landcover != 2
 
 def mrt_extractor(cur_dir):
+    
+    landcover_image = Image.open(r"C:\Users\weedingb\Desktop\COC_solweig_run\landcover_clipped.tif")
+
+    landcover_image = np.array(landcover_image)
+    
+    landcover_image[landcover_image!=2]=1
+    
+    landcover_image[landcover_image==2]=np.nan
+    
+    landcover_image = landcover_image[50:100,50:100]
     
     all_data = []
 
@@ -31,8 +43,12 @@ def mrt_extractor(cur_dir):
             cur_image = Image.open(cur_dir+'/'+file)
     
             current_data = np.array(cur_image)
+            
+            current_data = current_data[50:100,50:100]
     
             current_data[current_data==-9999] = np.nan
+            
+            current_data = current_data*landcover_image
             
             current_data = current_data.ravel()
             
@@ -46,7 +62,9 @@ def mrt_extractor(cur_dir):
         
     return all_data
         
-        
+
+jan17 = mrt_extractor(r"C:\Users\weedingb\Desktop\COC_sol_jan")
+apr17 = mrt_extractor(r"C:\Users\weedingb\Desktop\COC_sol_april")        
 
 
 bins = np.linspace(-5,65,141)
@@ -62,6 +80,7 @@ axs[0].yaxis.set_major_formatter(PercentFormatter(xmax=1))
 plt.show()
 
 
+bins = np.linspace(-5,65,141)
 
 
 fig, ax = plt.subplots()
