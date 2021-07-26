@@ -61,6 +61,8 @@ df['dia_perm_L2'] = df.apply(
     lambda row: dia_perm_solver(row['SoilH20_m3m3'],coeffs_L2),
     axis=1)
 
+df.to_csv(r'C:\Users\weedingb\Desktop\GPR_peat_Melinda\dia_perm_data.csv')
+
 ##############################################################################
 ################################## Junkyard ##################################
 ##############################################################################

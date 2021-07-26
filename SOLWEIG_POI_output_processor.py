@@ -13,17 +13,17 @@ import time
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib
-from labellines import labelLine, labelLines
+#from labellines import labelLine, labelLines
 
 os.chdir('C:/Users/weedingb/Desktop/solweig sample output')
 
-data_0 = pd.read_csv('C:/Users/weedingb/Desktop/solweig sample output/POI_0.txt',sep='\s+')
+data_1 = pd.read_csv('C:\\Users\\weedingb\\Desktop\\COC_sol_jan\\POI_1.txt',sep='\s+')
 
-data_1 = pd.read_csv('C:/Users/weedingb/Desktop/solweig sample output/POI_1.txt',sep='\s+')
+data_2 = pd.read_csv('C:\\Users\\weedingb\\Desktop\\COC_sol_jan\\POI_2.txt',sep='\s+')
 
 data_1['time_stamp'] = pd.to_datetime(data_1['yyyy'],format='%Y') + pd.to_timedelta(data_1['dectime']-1,unit='D')
 
-data_0['time_stamp'] = pd.to_datetime(data_0['yyyy'],format='%Y') + pd.to_timedelta(data_0['dectime']-1,unit='D')
+#data_2['time_stamp'] = pd.to_datetime(data_2['yyyy'],format='%Y') + pd.to_timedelta(data_2['dectime']-1,unit='D')
 
 fig, axs = plt.subplots(2, 1)
 
@@ -31,18 +31,21 @@ fig, axs = plt.subplots(2, 1)
 
 #plt.hlines(y=45, xmin=data_1['time_stamp'].iloc[0], xmax=data_1['time_stamp'].iloc[-1])
 axs[0].plot(data_1['time_stamp'],data_1['Tmrt'],label='MRT',color='salmon')
-axs[0].set_ylabel('Mean radiant \n temperature °C')
+axs[0].plot(data_1['time_stamp'],data_1['Ta'],label='Ta',color='red')
+axs[0].set_ylabel('°C')
 axs[0].grid(True)
 #plt.legend(loc='lower right')
 #set ticks every week
-axs[0].xaxis.set_major_locator(mdates.WeekdayLocator())
+#axs[0].xaxis.set_major_locator(mdates.WeekdayLocator())
 #set major ticks format
 axs[0].xaxis.set_major_formatter(mdates.DateFormatter(''))
 #axs[0].axhline(y=)#, xmin=data_1['time_stamp'].iloc[0], xmax=data_1['time_stamp'].iloc[-1])
 
 axs[0].set_yticks(range(0,51,10))
 
-fig.suptitle('Franklin square 2019 thermal data')
+#axs[0].legend()
+
+fig.suptitle('Point 1 (shaded) Jan Week 1 2017')
 
 axs[1].plot(data_1['time_stamp'],data_1['PET'],label='Physiologically equivalent temperature',color='violet')
 axs[1].set_ylabel('Physiologically \n equivalent \n temperature °C')
@@ -50,7 +53,7 @@ axs[1].grid(True)
 axs[1].set_ylim([0,50])
 #plt.legend(loc='lower right')
 #set ticks every week
-axs[1].xaxis.set_major_locator(mdates.WeekdayLocator())
+#axs[1].xaxis.set_major_locator(mdates.WeekdayLocator())
 #set major ticks format
 axs[1].xaxis.set_major_formatter(mdates.DateFormatter('%d %b'))
 axs[1].axhline(y=29,linestyle='--',linewidth=1)
@@ -59,7 +62,7 @@ axs[1].axhline(y=41,linestyle='--',linewidth=1)
 
 axs[1].set_yticks(range(0,51,10))
 
-
+axs[1].xaxis.set_major_formatter(mdates.DateFormatter(''))
 axs[1].text(data_1['time_stamp'].iloc[-65],42,'extreme',fontsize=8)
 axs[1].text(data_1['time_stamp'].iloc[-65],36,'strong',fontsize=8)
 axs[1].text(data_1['time_stamp'].iloc[-65],30,'moderate',fontsize=8)
