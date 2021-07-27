@@ -11,12 +11,17 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 import os
 import glob
+import xarray as xr
+import pandas as pd
+import time, datetime
 
 # can use landcover map buildings=2 to eliminate building value
 
 # raster multiply by landcover != 2
 
 def mrt_extractor(cur_dir):
+    
+    tick_mrt_extractor = time.perf_counter()
     
     landcover_image = Image.open(r"C:\Users\weedingb\Desktop\COC_solweig_run\landcover_clipped.tif")
 
@@ -59,6 +64,11 @@ def mrt_extractor(cur_dir):
             count += 1
         
     all_data = np.array(all_data)
+    
+    tock_mrt_extractor = time.perf_counter()
+    
+    # calculates run time
+    print(str(datetime.timedelta(seconds=tock_mrt_extractor-tick_mrt_extractor)))
         
     return all_data
         
@@ -67,17 +77,17 @@ jan17 = mrt_extractor(r"C:\Users\weedingb\Desktop\COC_sol_jan")
 apr17 = mrt_extractor(r"C:\Users\weedingb\Desktop\COC_sol_april")        
 
 
-bins = np.linspace(-5,65,141)
+# bins = np.linspace(-5,65,141)
 
-plt.hist(jan17, bins, alpha=0.5, label='Jan 17', density=True)
+# plt.hist(jan17, bins, alpha=0.5, label='Jan 17', density=True)
 
-plt.hist(apr17, bins, alpha=0.5, label='Apr 17', density=True)
+# plt.hist(apr17, bins, alpha=0.5, label='Apr 17', density=True)
 
-plt.legend(loc='upper right')
+# plt.legend(loc='upper right')
 
-axs[0].yaxis.set_major_formatter(PercentFormatter(xmax=1))
+# axs[0].yaxis.set_major_formatter(PercentFormatter(xmax=1))
 
-plt.show()
+# plt.show()
 
 
 bins = np.linspace(-5,65,141)
