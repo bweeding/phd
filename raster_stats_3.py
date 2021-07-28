@@ -75,7 +75,15 @@ def mrt_extractor_3(cur_dir):
     
             #current_data = xr.DataArray(current_data, dims=("timestamp","y", "x"),coords={"timestamp":[file.split("Tmrt_",1)[1].split(".tif",1)[0]],"x": np.arange(1,51),"y": np.arange(1,51)})
             
-            all_data[count,:,:] = current_data
+            #all_data[count,:,:] = current_data
+            xcoords = all_data.coords["x"]
+            
+            ycoords = all_data.coords["y"]
+            
+            tcoords = all_data.coords["timestamp"]
+            
+            all_data.loc[
+                dict(tcoords[tcoords==tcoords[count]],xcoords[xcoords>0],ycoords[ycoords>0])] = current_data
             
             #all_data.sel(timestamp=file.split("Tmrt_",1)[1].split(".tif",1)[0]) = current_data
             
