@@ -6,7 +6,7 @@ Created on Wed Jul 28 12:23:41 2021
 """
 
 
-
+import PIL
 from PIL import Image
 import numpy as np
 from scipy import ndimage
@@ -16,6 +16,9 @@ import glob
 import xarray as xr
 import pandas as pd
 import time, datetime
+
+#TODO: convert time strings to numpy datetime64
+# https://stackoverflow.com/questions/47178086/convert-string-to-numpy-datetime64-dtype
 
 # can use landcover map buildings=2 to eliminate building value
 
@@ -42,14 +45,31 @@ def mrt_extractor_3(current_dir):
     
     file_count = len(valid_files)
     
-    all_data =  xr.DataArray(np.zeros((file_count,50,50)), dims=("timestamp","y", "x"),coords={"timestamp":[i.split("Tmrt_",1)[1].split(".tif",1)[0] for i in valid_files],"x": np.arange(1,51),"y": np.arange(1,51)})
+    first_image = Image.open(current_dir+'/'+valid_files[0])
+
+    # for info use PIL.TiffTags.lookup(33922)
+    # geotiffs are referenced to the top left of the image
+    xdim_start = first_image.tag[33922][3]
+    
+    ydim_start = first_image.tag[33922][4]
+    
+    xpixel_size = first_image.tag[33550][0]
+    
+    ypixel_size = first_image.tag[33550][1]
+    
+    xcoords = np.linspace(xdim_start+50*xpixel_size,xdim_start+99*xpixel_size,50)
+    
+    ycoords = np.linspace(ydim_start-50*ypixel_size,ydim_start-99*ypixel_size,50)
+            
+    
+    all_data =  xr.DataArray(np.zeros((file_count,50,50)), dims=("timestamp","y", "x"),coords={"timestamp":[i.split("Tmrt_",1)[1].split(".tif",1)[0] for i in valid_files],"x": xcoords,"y": ycoords})
     
     for current_file,current_ts in zip(valid_files,all_data.coords["timestamp"]):
             
         print("{}%".format(round(count/file_count*100,2)))
         
         current_image = Image.open(current_dir+'/'+current_file)
-        
+                
         current_data = np.array(current_image)
         
         current_data = current_data[50:100,50:100]
@@ -72,6 +92,6 @@ def mrt_extractor_3(current_dir):
 
 #file.split("Tmrt_",1)[1].split(".tif",1)[0]
 
-big = mrt_extractor_3(r"C:\\Users\\weedingb\\SOLWEIG_run_07-07-2021_0444\\SOLWEIG_output_07-07-2021_0444")
-# jan17 = mrt_extractor_3(r"C:\Users\weedingb\Desktop\COC_sol_jan")
+#big = mrt_extractor_3(r"C:\\Users\\weedingb\\SOLWEIG_run_07-07-2021_0444\\SOLWEIG_output_07-07-2021_0444")
+jan17 = mrt_extractor_3(r"C:\Users\weedingb\Desktop\COC_sol_jan")
 # apr17 = mrt_extractor_3(r"C:\Users\weedingb\Desktop\COC_sol_april") 
