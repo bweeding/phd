@@ -29,6 +29,18 @@ def mrt_extractor_3(current_dir):
     # initial time
     tick_mrt_extractor_xr = time.perf_counter()
     
+    
+    # met data
+    run_info_name = glob.glob1(current_dir,'RuninfoSOLWEIG*.txt')
+    
+    with open(current_dir+'/'+run_info_name[0]) as run_info:
+    
+        run_info_lines = run_info.readlines()
+    
+    metfile_location = [x for x in run_info_lines if x.startswith("Meteorological file")][0].split("Meteorological file: ")[1].split("\n")[0]
+    
+    
+    # landcover data 
     landcover_image = Image.open(r"C:\Users\weedingb\Desktop\COC_solweig_run\landcover_clipped.tif")
 
     landcover_image = np.array(landcover_image)
@@ -39,9 +51,11 @@ def mrt_extractor_3(current_dir):
  
     landcover_image = landcover_image[50:100,50:100]
     
+    
+    # mrt rasters
     count = 0
     
-    valid_files = glob.glob1(current_dir,"Tmrt_2*")
+    valid_files = glob.glob1(current_dir,"Tmrt_[12]**.tif")
     
     file_count = len(valid_files)
     
@@ -60,9 +74,8 @@ def mrt_extractor_3(current_dir):
     xcoords = np.linspace(xdim_start+50*xpixel_size,xdim_start+99*xpixel_size,50)
     
     ycoords = np.linspace(ydim_start-50*ypixel_size,ydim_start-99*ypixel_size,50)
-            
     
-    all_data =  xr.DataArray(np.zeros((file_count,50,50)), dims=("timestamp","y", "x"),coords={"timestamp":[i.split("Tmrt_",1)[1].split(".tif",1)[0] for i in valid_files],"x": xcoords,"y": ycoords})
+    all_data =  xr.DataArray(np.zeros((file_count,50,50)), dims=("timestamp","y", "x"),coords={"timestamp":[pd.to_datetime(i.split("Tmrt_",1)[1].split(".tif",1)[0][0:-1],format='%Y_%j_%H%M') for i in valid_files] ,"x": xcoords,"y": ycoords})
     
     for current_file,current_ts in zip(valid_files,all_data.coords["timestamp"]):
             
