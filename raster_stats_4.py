@@ -16,6 +16,7 @@ import glob
 import xarray as xr
 import pandas as pd
 import time, datetime
+from pythermalcomfort.models import utci
 
 #TODO: convert time strings to numpy datetime64
 # https://stackoverflow.com/questions/47178086/convert-string-to-numpy-datetime64-dtype
@@ -85,7 +86,9 @@ def mrt_extractor_3(current_dir):
     
     ycoords = np.linspace(ydim_start-50*ypixel_size,ydim_start-99*ypixel_size,50)
     
-    tmrt_data =  xr.DataArray(np.zeros((file_count,50,50)), dims=("timestamp","y", "x"),coords={"timestamp":[pd.to_datetime(i.split("Tmrt_",1)[1].split(".tif",1)[0][0:-1],format='%Y_%j_%H%M') for i in valid_files] ,"x": xcoords,"y": ycoords})
+    #tmrt_data =  xr.DataArray(np.zeros((file_count,50,50)), dims=("timestamp","y", "x"),coords={"timestamp":[pd.to_datetime(i.split("Tmrt_",1)[1].split(".tif",1)[0][0:-1],format='%Y_%j_%H%M') for i in valid_files] ,"x": xcoords,"y": ycoords})
+   
+    tmrt_data =  xr.DataArray(np.zeros((file_count,50,50)), dims=("timestamp","y", "x"),coords={"timestamp":met_data["datetime"] ,"x": xcoords,"y": ycoords}) 
     
     for current_file,current_ts in zip(valid_files,tmrt_data.coords["timestamp"]):
             
@@ -111,8 +114,26 @@ def mrt_extractor_3(current_dir):
     print(str(datetime.timedelta(seconds=tock_mrt_extractor_xr-tick_mrt_extractor_xr)))
     
     all_data = xr.Dataset(dict(Tmrt=tmrt_data,RH=RH_data,Tair=Tair_data,Uwind=Uwind_data))
+
+    
+    pet_vec = np.vectorize(_PET)
+    
+    def pet_array(a,b,c,d,e,f,g,h,i,j):
+            
+        return xr.apply_ufunc(pet_vec,a,b,c,d,e,f,g,h,i,j)
+    
+    pet_data =  xr.DataArray(np.zeros((file_count,50,50)), dims=("timestamp","y", "x"),coords={"timestamp":met_data["datetime"] ,"x": xcoords,"y": ycoords}) 
+    
+    for i in range(0,50):
+        
+        for j in range(0,50):
+            
+            pet_data[:,i,j] = pet_array(all_data["Tair"].values[:],all_data["RH"].values[:],all_data["Tmrt"].values[:,i,j],all_data["Uwind"].values[:],90,30,1.78,100,3,1)
+            
+            
     
     
+    print(utci(tdb = all_data["Tair"].values[1], tr=all_data["Tmrt"].values[1,1,1],v=all_data["Uwind"].values[1],rh=all_data["RH"].values[1]))
         
     return all_data
 
