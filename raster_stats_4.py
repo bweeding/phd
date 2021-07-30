@@ -38,6 +38,16 @@ def mrt_extractor_3(current_dir):
         run_info_lines = run_info.readlines()
     
     metfile_location = [x for x in run_info_lines if x.startswith("Meteorological file")][0].split("Meteorological file: ")[1].split("\n")[0]
+        
+    met_data = pd.read_csv(metfile_location,sep=' ')
+        
+    met_data['datetime'] = pd.to_datetime(met_data['iy'].map(str)+'_'+met_data['id'].map(str)+'_'+met_data['it'].map(str)+met_data['imin'].map(str),format='%Y_%j_%H%M')    
+    
+    RH_data =  xr.DataArray(met_data["RH"], dims=("timestamp"),coords={"timestamp":met_data["datetime"]})
+    
+    Tair_data =  xr.DataArray(met_data["Tair"], dims=("timestamp"),coords={"timestamp":met_data["datetime"]})
+    
+    Uwind_data =  xr.DataArray(met_data["U"], dims=("timestamp"),coords={"timestamp":met_data["datetime"]})
     
     
     # landcover data 
@@ -75,9 +85,9 @@ def mrt_extractor_3(current_dir):
     
     ycoords = np.linspace(ydim_start-50*ypixel_size,ydim_start-99*ypixel_size,50)
     
-    all_data =  xr.DataArray(np.zeros((file_count,50,50)), dims=("timestamp","y", "x"),coords={"timestamp":[pd.to_datetime(i.split("Tmrt_",1)[1].split(".tif",1)[0][0:-1],format='%Y_%j_%H%M') for i in valid_files] ,"x": xcoords,"y": ycoords})
+    tmrt_data =  xr.DataArray(np.zeros((file_count,50,50)), dims=("timestamp","y", "x"),coords={"timestamp":[pd.to_datetime(i.split("Tmrt_",1)[1].split(".tif",1)[0][0:-1],format='%Y_%j_%H%M') for i in valid_files] ,"x": xcoords,"y": ycoords})
     
-    for current_file,current_ts in zip(valid_files,all_data.coords["timestamp"]):
+    for current_file,current_ts in zip(valid_files,tmrt_data.coords["timestamp"]):
             
         print("{}%".format(round(count/file_count*100,2)))
         
@@ -91,7 +101,7 @@ def mrt_extractor_3(current_dir):
         
         current_data[current_data==-9999] = np.nan
         
-        all_data.loc[dict(timestamp=current_ts)]=current_data
+        tmrt_data.loc[dict(timestamp=current_ts)]=current_data
         
         count += 1
 
@@ -99,6 +109,10 @@ def mrt_extractor_3(current_dir):
     
     # calculates run time
     print(str(datetime.timedelta(seconds=tock_mrt_extractor_xr-tick_mrt_extractor_xr)))
+    
+    all_data = xr.Dataset(dict(Tmrt=tmrt_data,RH=RH_data,Tair=Tair_data,Uwind=Uwind_data))
+    
+    
         
     return all_data
 
