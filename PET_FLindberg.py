@@ -50,6 +50,13 @@ def _PET(ta,RH,tmrt,v,mbody,age,ht,work,icl,sex):
         sex: 1=male 2=female
     Returns:
     """
+    
+    #my mod
+    if tmrt == np.nan:
+        
+        print('Tmrt is nan')
+        
+        return np.nan
 
     # humidity conversion
     vps = 6.107 * (10. ** (7.5 * ta / (238. + ta)))
